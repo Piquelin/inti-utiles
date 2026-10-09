@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unidad Contra el Presidente Anarco Capitalista</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #1a1a24; 
+            --text: #e0e0e0; 
+            --accent: #ff4757; 
+            --danger: #ff6b81; 
+            --safe: #2ed573; 
+            --panel-bg: rgba(20, 20, 30, 0.85);
+            --border: #474759;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 100% 150%, var(--bg) 24%, var(--bg) 24%, var(--bg) 28%, var(--bg) 28%, var(--bg) 36%, var(--bg) 36%, var(--bg) 40%, transparent 40%, transparent),
+                radial-gradient(circle at 0    150%, var(--bg) 24%, var(--bg) 24%, var(--bg) 28%, var(--bg) 28%, var(--bg) 36%, var(--bg) 36%, var(--bg) 40%, transparent 40%, transparent),
+                radial-gradient(circle at 50%  100%, #2a2a35 10%, var(--bg) 11%, var(--bg) 23%, #2a2a35 24%, #2a2a35 24%, var(--bg) 25%, var(--bg) 35%, #2a2a35 36%, #2a2a35 36%, var(--bg) 37%, var(--bg) 47%, #2a2a35 48%, #2a2a35 48%, var(--bg) 49%, var(--bg) 59%, #2a2a35 60%, #2a2a35 60%, var(--bg) 61%, var(--bg) 71%, #2a2a35 72%, #2a2a35 72%, var(--bg) 73%, var(--bg) 83%, #2a2a35 84%, #2a2a35 84%, var(--bg) 85%, var(--bg) 95%, #2a2a35 96%, #2a2a35 96%, var(--bg) 97%, var(--bg) 100%);
+            background-size: 50px 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            color: var(--text);
+        }
+        #game-container {
+            position: relative;
+            width: 95vw;
+            max-width: 1000px;
+            aspect-ratio: 16/10;
+            max-height: 90vh;
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #111;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 71, 87, 0.2);
+        }
+        canvas { 
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+            image-rendering: pixelated;
+        }
+        #ui-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none; display: flex; flex-direction: column;
+            justify-content: space-between; padding: 12px 16px;
+        }
+        #hud { 
+            display: flex; 
+            justify-content: space-between; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .hud-panel {
+            background: var(--panel-bg); 
+            border: 2px solid var(--border);
+            border-radius: 8px; 
+            padding: 8px 14px; 
+            color: var(--text);
+            font-size: 14px; 
+            font-weight: 700;
+            backdrop-filter: blur(8px); 
+            pointer-events: auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hud-panel span { color: var(--accent); font-family: 'Press Start 2P', cursive; font-size: 10px; margin-left: 4px; }
+        .hud-panel.danger span { color: var(--danger); }
+        .hud-panel.safe span { color: var(--safe); }
+        .emoji-icon { font-size: 1.2em; }
+        .hud-panel .progress-track { width: 70px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; flex: none; }
+        .hud-panel .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.2s ease-out; }
+        .hud-panel.combo-active span:last-child { color: #eccc68; }
+        #hud-lives { font-family: 'Inter', sans-serif; font-size: 13px; letter-spacing: 2px; }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <audio id="bgm" loop>
+        <source src="internacional.mp3" type="audio/mpeg">
+    </audio>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-overlay">
+            <div id="hud">
+                <div class="hud-panel"><span class="emoji-icon">👥</span> <span id="hud-citizens">0</span></div>
+                <div class="hud-panel"><span class="emoji-icon">📋</span> <span id="hud-level-title">Nivel 1</span></div>
+                <div class="hud-panel danger"><span class="emoji-icon">🚔</span> <span id="hud-police">0</span></div>
+                <div class="hud-panel safe"><span class="emoji-icon">🛡️</span> <span id="hud-shelter">—</span></div>
+                <div class="hud-panel"><span class="emoji-icon">🎯</span> Nec: <span id="hud-required">6</span></div>
+                <div class="hud-panel"><span class="emoji-icon">💪</span> Fza: <span id="hud-strength">0</span></div>
+                <div class="hud-panel"><span class="emoji-icon">🏆</span> <span id="hud-score">0</span></div>
+                <div class="hud-panel"><span class="emoji-icon">⏱️</span> <span id="hud-timer">0:55</span></div>
+                <div class="hud-panel"><span class="emoji-icon">❤️</span> <span id="hud-lives">3</span></div>
+                <div class="hud-panel" id="hud-combo-panel"><span class="emoji-icon">⚡</span> <span id="hud-combo">×1</span></div>
+                <div class="hud-panel"><span class="emoji-icon">🚩</span> <div class="progress-track"><div class="progress-fill" id="hud-progress"></div></div></div>
+            </div>
+            <div id="mute-btn" class="hud-panel" style="position: absolute; bottom: 12px; right: 16px; cursor: pointer; z-index: 10;">
+                <span class="emoji-icon">🔊</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            // ==================== JUEGO COMPLETO ====================
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('game-container');
+
+            const hudCitizens = document.getElementById('hud-citizens');
+            const hudLevelTitle = document.getElementById('hud-level-title');
+            const hudPolice = document.getElementById('hud-police');
+            const hudShelter = document.getElementById('hud-shelter');
+            const hudRequired = document.getElementById('hud-required');
+            const hudStrength = document.getElementById('hud-strength');
+            const hudScore = document.getElementById('hud-score');
+            const hudTimer = document.getElementById('hud-timer');
+            const hudTimerPanel = hudTimer.parentElement;
+            const hudLives = document.getElementById('hud-lives');
+            const hudCombo = document.getElementById('hud-combo');
+            const hudComboPanel = document.getElementById('hud-combo-panel');
+            const hudProgress = document.getElementById('hud-progress');
+            
+            const muteBtn = document.getElementById('mute-btn');
+            muteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const bgm = document.getElementById('bgm');
+                if (bgm) {
+                    bgm.muted = !bgm.muted;
+                    muteBtn.innerHTML = bgm.muted ? '<span class="emoji-icon">🔇</span>' : '<span class="emoji-icon">🔊</span>';
+                }
+            });
+
+            // =============== ASSETS ===============
+            const assets = {
+                boss: new Image()
+            };
+            assets.boss.src = 'presidente.png';
+
+            // =============== CONFIGURACIÓN ===============
+            const MAX_REGULAR_LEVELS = 5;
+            const BOSS_LEVEL_NUM = MAX_REGULAR_LEVELS + 1;
+
+            const LEVEL_TITLES = {
+                1: "Organicemos a los discapacitados",
+				2: "Organicemos a los jubilados",
+                3: "Unamos a los científicos",
+                4: "Unamos a las feministas y diversidades",
+                5: "Despertemos a los estudiantes",
+            };
+            LEVEL_TITLES[BOSS_LEVEL_NUM] = "Agrupemonos todos";
+
+            const RESISTANCE_FOCUS = {
+                1: { name: "Congreso", message: "El Congreso vota la ley de emergencia en salud y discapacidad." },
+				2: { name: "Marcha Miércoles", message: "Jubilados se convocan para reclamar\npor una jubilación digna." },
+                3: { name: "INTI", message: "Trabajadores defienden la\nciencia y tecnología." },
+                4: { name: "8M", message: "Mujeres y diversidades se movilizan\n masivamente contra los femicidios\ny las políticas machistas." },
+                5: { name: "Universidad Pública", message: "Estudiantes y docentes\ndefienden la educación." },
+                [BOSS_LEVEL_NUM]: { name: "TODOS A LA PLAZA", message: "La comunidad se moviliza\nmasivamente en forma espontanea." }
+            };
+
+            const FLAG_MESSAGES = {
+				1: "¡Los discapacitados voltean\nel Veto del gobierno!",
+                2: "¡Los Jubilados organizados\nse suman!",
+                3: "¡Los trabajadores voltean el decreto\nque centraliza al INTI y al INTA!",
+                4: "¡La marea verde vuelve\na ser protagonista y marca el camino!",
+                5: "¡La justicia ratifica que el gobierno\ntiene que cumplir la Ley\nde Financiamiento Universitario!",
+                [BOSS_LEVEL_NUM]: "¡LA GRAN HUELGA GENERAL\nHA COMENZADO!"
+            };
+
+            const BOSS_TAUNTS = [
+                "Esto es un montaje de la prensa.",
+                "¿Querés asado? Yo compro todo.",
+                "La motosierra no perdona.",
+                "Es culpa del gobierno anterior.",
+                "¡Vamo' a volver!",
+                "Los derechos se negocian, ¿o no?"
+            ];
+            let bossTauntTimer = 3;
+            let bossTauntText = '';
+
+            function getLevelConfig(lvl) {
+                const c = {
+                    1: { citizens:15, police:2, policeSpeed:1.2, citizenSpeed:1.0, timeLimit:55, required:6, type:'discapacitado' },
+                    2: { citizens:20, police:3, policeSpeed:1.6, citizenSpeed:1.3, timeLimit:48, required:8, type:'jubilado' },
+                    3: { citizens:25, police:4, policeSpeed:2.0, citizenSpeed:1.5, timeLimit:42, required:10, type:'cientifico' },
+                    4: { citizens:25, police:4, policeSpeed:2.1, citizenSpeed:1.5, timeLimit:42, required:10, type:'feminista' },
+                    5: { citizens:28, police:5, policeSpeed:2.3, citizenSpeed:1.6, timeLimit:40, required:12, type:'universitario' },
+                };
+                return c[lvl] || c[5];
+            }
+
+            // =============== AUDIO ===============
+            let audioCtx = null;
+            function initAudio() {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            }
+            function playBeep(f, d, t='square', v=0.08) {
+                if (!audioCtx) return;
+                try {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+                    g.gain.setValueAtTime(v, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.start(); o.stop(audioCtx.currentTime + d);
+                } catch(e) {}
+            }
+            function sfxCollect() { playBeep(600,0.1,'sine',0.07); playBeep(900,0.08,'sine',0.05); }
+            function sfxBattle() { playBeep(80,0.3,'square',0.1); }
+            function sfxVictory() { playBeep(523,0.15); setTimeout(()=>playBeep(659,0.15),150); setTimeout(()=>playBeep(784,0.25),300); }
+            function sfxFlagSpawn() { playBeep(800,0.1,'sine',0.08); playBeep(1000,0.15,'sine',0.09); }
+            function sfxMobilization() { playBeep(200,0.5,'square',0.12); playBeep(300,0.6,'triangle',0.1); }
+
+            // =============== ESTADOS ===============
+            const STATE = {
+                MENU:'menu', TUTORIAL:'tutorial', PLAYING:'playing',
+                BOSS_INTRO:'boss_intro', BOSS_BATTLE:'boss_battle',
+                LEVEL_COMPLETE:'level_complete', GAME_OVER:'game_over', VICTORY:'victory'
+            };
+            let gameState = STATE.MENU;
+            let currentLevel = 1;
+            let score = 0;
+            let lives = 3;
+            let comboStreak = 0;
+            let comboMultiplier = 1;
+            let highScore = parseInt(localStorage.getItem('agrupe_highscore') || '0', 10) || 0;
+            let levelTimer = 0, levelTimeLimit = 55;
+            let player;
+            let citizens = [], policeUnits = [], safeZones = [], particles = [];
+            let resistanceFocus = null; 
+            let boss = null;
+            let flag = null;
+            const bossFlagRequired = 18;
+            let mobilization = { active: false, timer: 0, outcomeState: null };
+            let floatingMessages = [];
+            let bossIntroTimer = 0;
+            const keys = {};
+            let mobileDir = { x:0, y:0 };
+            
+            let cameraShake = 0;
+
+            let W, H;
+            function resizeCanvas() {
+                const rect = container.getBoundingClientRect();
+                W = Math.floor(rect.width * Math.min(window.devicePixelRatio || 1, 2));
+                H = Math.floor(rect.height * Math.min(window.devicePixelRatio || 1, 2));
+                if (canvas.width !== W || canvas.height !== H) {
+                    canvas.width = W; canvas.height = H;
+                }
+            }
+
+            // =============== CLASES ===============
+            class Player {
+                constructor(x, y) {
+                    this.x = x; this.y = y; this.radius = 16;
+                    this.speed = 3.5; this.collected = []; this.trail = [];
+                    this.invuln = 0; this.speedBoost = 0; this.shield = false; this.shieldTimer = 0;
+                    this.facing = 1; // 1 right, -1 left
+                }
+                update(dt) {
+                    let dx = 0, dy = 0;
+                    if (keys['w']||keys['arrowup']) dy=-1;
+                    if (keys['s']||keys['arrowdown']) dy=1;
+                    if (keys['a']||keys['arrowleft']) { dx=-1; this.facing = -1; }
+                    if (keys['d']||keys['arrowright']) { dx=1; this.facing = 1; }
+                    dx += mobileDir.x; dy += mobileDir.y;
+                    const mag = Math.sqrt(dx*dx+dy*dy);
+                    if (mag > 1) { dx /= mag; dy /= mag; }
+                    const spd = this.speed + this.speedBoost;
+                    this.x += dx * spd * dt * 60;
+                    this.y += dy * spd * dt * 60;
+                    this.x = Math.max(this.radius, Math.min(W-this.radius, this.x));
+                    this.y = Math.max(this.radius, Math.min(H-this.radius, this.y));
+                    this.trail.push({x:this.x, y:this.y});
+                    if (this.trail.length > 30) this.trail.shift();
+                    if (this.invuln > 0) this.invuln -= dt;
+                    if (this.speedBoost > 0) this.speedBoost = Math.max(0, this.speedBoost - dt*0.8);
+                    if (this.shieldTimer > 0) { this.shieldTimer -= dt; if (this.shieldTimer<=0) this.shield=false; }
+                    for (let i=0; i<this.collected.length; i++) {
+                        const c = this.collected[i];
+                        const idx = Math.min(i+3, this.trail.length-1);
+                        const t = this.trail[this.trail.length-1-idx] || {x:this.x, y:this.y};
+                        const angle = i*1.2 + Date.now()*0.002;
+                        const dist = 16 + (i%5)*8;
+                        c.x += (t.x + Math.cos(angle)*dist - c.x) * 0.15;
+                        c.y += (t.y + Math.sin(angle)*dist - c.y) * 0.15;
+                    }
+                }
+                draw(ctx) {
+                    if (this.shield) {
+                        ctx.beginPath(); ctx.arc(this.x,this.y,this.radius+8,0,Math.PI*2);
+                        ctx.fillStyle='rgba(46, 213, 115, 0.3)'; ctx.fill();
+                    }
+                    if (this.invuln>0 && Math.floor(this.invuln*20)%2===0) ctx.globalAlpha=0.5;
+                    
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.scale(this.facing, 1);
+                    
+                    // Body
+                    ctx.fillStyle = '#ff4757'; 
+                    ctx.beginPath(); ctx.roundRect(-this.radius, -this.radius, this.radius*2, this.radius*2, 8); ctx.fill();
+                    ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
+                    
+                    // Face
+                    ctx.fillStyle = '#ffeaa7';
+                    ctx.beginPath(); ctx.roundRect(-this.radius+6, -this.radius+4, this.radius*2-8, this.radius, 4); ctx.fill();
+                    
+                    // Megaphone
+                    ctx.fillStyle = '#f1f2f6';
+                    ctx.beginPath();
+                    ctx.moveTo(this.radius, 0);
+                    ctx.lineTo(this.radius + 12, -8);
+                    ctx.lineTo(this.radius + 12, 8);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 1; ctx.stroke();
+
+                    ctx.restore();
+                    ctx.globalAlpha = 1;
+
+                    if (this.collected.length>=6) {
+                        ctx.beginPath(); ctx.arc(this.x,this.y,this.radius+10,0,Math.PI*2);
+                        ctx.strokeStyle='#eccc68'; ctx.lineWidth=2; ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+                    }
+                }
+                getStrength() { return this.collected.length; }
+                addCitizen(c) {
+                    if (this.collected.length < 35) {
+                        c.free = false; c.collected = true; this.collected.push(c); sfxCollect();
+                        if (this.collected.length === 8) this.speedBoost = 2.5;
+                        if (this.collected.length === 15) { this.shield = true; this.shieldTimer = 8; }
+                        
+                        for(let i=0; i<5; i++) {
+                            particles.push({
+                                x: c.x, y: c.y,
+                                color: '#ff4757', life: 0.5,
+                                vx: (Math.random()-0.5)*100, vy: (Math.random()-0.5)*100,
+                                radius: 3,
+                                update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                                draw(ctx) { ctx.globalAlpha = this.life*2; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                                alive() { return this.life>0; }
+                            });
+                        }
+                    }
+                }
+                loseCitizens(n) {
+                    const lost = [];
+                    for (let i=0; i<n && this.collected.length>0; i++) {
+                        const c = this.collected.pop();
+                        c.free = true; c.collected = false;
+                        c.x = this.x + (Math.random()-0.5)*80;
+                        c.y = this.y + (Math.random()-0.5)*80;
+                        c.scatter = 1.5;
+                        lost.push(c);
+                        citizens.push(c);
+                    }
+                    this.invuln = 1.0;
+                    cameraShake = 10; 
+                    return lost;
+                }
+            }
+
+            class Citizen {
+                constructor(x, y, type) {
+                    this.x = x; this.y = y; this.radius = 16;
+                    this.free = true; this.collected = false;
+                    this.wanderAngle = Math.random()*Math.PI*2;
+                    this.wanderTimer = Math.random()*3;
+                    this.speed = 0.6; this.scatter = 0;
+                    this.type = type;
+                    this.emoji = this.getEmoji();
+                }
+                getEmoji() {
+                    if (this.type === 'jubilado') return ['👴🏽','👵🏽','🧓🏼'][Math.floor(Math.random()*3)];
+                    if (this.type === 'discapacitado') return ['🧑🏽🦽','👩🏻🦽','👨🦽','🧑🦯'][Math.floor(Math.random()*4)];
+                    if (this.type === 'cientifico') return ['🧑🏽⚕️','👩🏽⚕️','👨🏻🔬'][Math.floor(Math.random()*3)];
+                    if (this.type === 'feminista') return ['👩🏽','👩🏻🎤','👩🏿🎤','👩🏽🦱'][Math.floor(Math.random()*4)];
+                    if (this.type === 'universitario') return ['👨🏽🎓','👩🏻🎓','🧑🎓','👩🏽🏫'][Math.floor(Math.random()*4)];
+                    return '👤';
+                }
+                update(dt, config) {
+                    if (this.collected) return;
+                    if (this.scatter>0) { this.scatter-=dt; this.x+=(Math.random()-0.5)*4; this.y+=(Math.random()-0.5)*4; return; }
+                    this.speed = config.citizenSpeed;
+                    this.wanderTimer -= dt;
+                    if (this.wanderTimer<=0) { this.wanderAngle+=(Math.random()-0.5)*1.5; this.wanderTimer=1.5+Math.random()*3; }
+                    this.x += Math.cos(this.wanderAngle)*this.speed*dt*60;
+                    this.y += Math.sin(this.wanderAngle)*this.speed*dt*60;
+                    this.x = Math.max(this.radius, Math.min(W-this.radius, this.x));
+                    this.y = Math.max(this.radius, Math.min(H-this.radius, this.y));
+                }
+                draw(ctx) {
+                    if (this.collected) return;
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+                    ctx.fillStyle = '#ffffff'; ctx.fill();
+                    ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.fillStyle = '#000';
+                    ctx.font = '20px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.emoji, this.x, this.y+2);
+                }
+                drawCollected(ctx, x, y) {
+                    ctx.save(); ctx.translate(x, y);
+                    ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI*2);
+                    ctx.fillStyle = '#ff4757'; ctx.fill();
+                    ctx.strokeStyle = '#ff6b81'; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.fillStyle = '#000';
+                    ctx.font = '20px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(this.emoji, 0, 2);
+                    ctx.restore();
+                }
+            }
+
+            class PoliceUnit {
+                constructor(x, y, speed) {
+                    this.x = x; this.y = y; this.radius = 16;
+                    this.speed = speed; this.state = 'patrol'; this.stunTimer = 0;
+                    this.patrolAngle = Math.random()*Math.PI*2; this.patrolTimer = 0;
+                    this.facing = -1;
+                    this.nearMissCd = 0;
+                }
+                update(dt, playerRef, config) {
+                    if (this.stunTimer>0) { this.stunTimer-=dt; return; }
+                    if (this.nearMissCd>0) this.nearMissCd-=dt;
+                    this.speed = config.policeSpeed;
+                    let target = null, minDist = Infinity;
+                    if (playerRef && playerRef.getStrength()>0) {
+                        const d = Math.hypot(this.x-playerRef.x, this.y-playerRef.y);
+                        if (d<300) { target=playerRef; minDist=d; }
+                    }
+                    for (let c of citizens) {
+                        if (c.collected||c.scatter>0) continue;
+                        const d = Math.hypot(this.x-c.x, this.y-c.y);
+                        if (d<200 && d<minDist) { target=c; minDist=d; }
+                    }
+                    if (target && minDist<250) {
+                        this.state = 'chase';
+                        const angle = Math.atan2(target.y-this.y, target.x-this.x);
+                        this.x += Math.cos(angle)*this.speed*1.2*dt*60;
+                        this.y += Math.sin(angle)*this.speed*1.2*dt*60;
+                        this.facing = Math.cos(angle) > 0 ? 1 : -1;
+                    } else {
+                        this.state = 'patrol';
+                        this.patrolTimer -= dt;
+                        if (this.patrolTimer<=0) { this.patrolAngle+=(Math.random()-0.5)*2; this.patrolTimer=2+Math.random()*3; }
+                        this.x += Math.cos(this.patrolAngle)*this.speed*0.5*dt*60;
+                        this.y += Math.sin(this.patrolAngle)*this.speed*0.5*dt*60;
+                        this.facing = Math.cos(this.patrolAngle) > 0 ? 1 : -1;
+                    }
+                    this.x = Math.max(this.radius, Math.min(W-this.radius, this.x));
+                    this.y = Math.max(this.radius, Math.min(H-this.radius, this.y));
+                }
+                draw(ctx) {
+                    if (this.stunTimer>0 && Math.floor(this.stunTimer*15)%2===0) return;
+                    
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.scale(this.facing, 1);
+                    
+                    // Body
+                    ctx.fillStyle = '#1e90ff';
+                    ctx.beginPath(); ctx.roundRect(-this.radius, -this.radius, this.radius*2, this.radius*2, 6); ctx.fill();
+                    ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
+                    
+                    // Shield
+                    ctx.fillStyle = '#2f3542';
+                    ctx.beginPath(); ctx.roundRect(this.radius-4, -this.radius-2, 6, this.radius*2+4, 2); ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '10px "Inter", sans-serif';
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText('P', this.radius-1, 0); 
+                    
+                    // Helmet visor
+                    ctx.fillStyle = '#111';
+                    ctx.fillRect(this.radius-10, -8, 8, 8);
+
+                    ctx.restore();
+                }
+                stun(d) { this.stunTimer = d; this.state = 'stunned'; }
+            }
+
+            class SafeZone {
+                constructor(x, y, radius, permanent, name = '', message = '') {
+                    this.x = x; this.y = y; this.radius = radius;
+                    this.timer = permanent ? Infinity : 10; this.active = true;
+                    this.permanent = permanent;
+                    this.phase = Math.random()*Math.PI*2;
+                    this.name = name;
+                    this.message = message;
+                    this.messageShown = false; 
+                }
+                update(dt) {
+                    if (!this.permanent) { this.timer -= dt; if (this.timer <= 0) this.active = false; }
+                    this.phase += dt*2;
+                }
+                draw(ctx) {
+                    const alpha = this.active ? (0.3 + Math.sin(this.phase)*0.1) : 0;
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(46, 213, 115, ${alpha})`; ctx.fill();
+                    ctx.strokeStyle = `rgba(46, 213, 115, ${alpha * 2})`; ctx.lineWidth = 2;
+                    ctx.setLineDash([8,4]); ctx.stroke(); ctx.setLineDash([]);
+                    
+                    if (this.name) {
+                        ctx.fillStyle = '#2ed573'; 
+                        ctx.font = 'bold 12px "Inter", sans-serif'; 
+                        ctx.textAlign = 'center';
+                        ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+                        ctx.fillText(this.name, this.x, this.y - this.radius - 10);
+                        ctx.shadowBlur = 0;
+                    }
+                }
+                contains(px, py, r=0) { return Math.hypot(px - this.x, py - this.y) < this.radius + r; }
+            }
+
+            class Flag {
+                constructor(x,y) { this.x=x; this.y=y; this.poleX=x; this.poleY=y-25; this.wave=0; this.active=true; }
+                update(dt) { this.wave+=dt*5; }
+                draw(ctx) {
+                    ctx.strokeStyle='#bdc3c7'; ctx.lineWidth=4;
+                    ctx.beginPath(); ctx.moveTo(this.poleX,this.poleY); ctx.lineTo(this.poleX,this.poleY+50); ctx.stroke();
+                    const off=Math.sin(this.wave)*4;
+                    ctx.fillStyle='#ff4757';
+                    ctx.beginPath(); ctx.moveTo(this.poleX,this.poleY); ctx.lineTo(this.poleX+40+off,this.poleY+15);
+                    ctx.lineTo(this.poleX+35+off,this.poleY+25); ctx.lineTo(this.poleX,this.poleY+30); ctx.closePath(); ctx.fill();
+                    ctx.fillStyle='white'; ctx.font='bold 16px sans-serif'; ctx.textAlign='center';
+                    ctx.fillText('★',this.poleX+18,this.poleY+18); ctx.textAlign='start';
+                    const pulse = (Math.sin(this.wave*1.5)+1)/2;
+                    ctx.beginPath(); ctx.arc(this.poleX+18, this.poleY+25, 40+pulse*22, 0, Math.PI*2);
+                    ctx.strokeStyle = 'rgba(255,71,87,'+(0.55-pulse*0.4)+')'; ctx.lineWidth=2; ctx.stroke();
+                    const bobY = Math.sin(this.wave*1.8)*5;
+                    ctx.fillStyle = '#ff4757';
+                    ctx.beginPath(); ctx.moveTo(this.poleX+10, this.poleY-26+bobY); ctx.lineTo(this.poleX+26, this.poleY-26+bobY); ctx.lineTo(this.poleX+18, this.poleY-13+bobY); ctx.closePath(); ctx.fill();
+                }
+            }
+
+            class Boss {
+                constructor(x,y) {
+                    this.x=x; this.y=y; this.radius=45; this.speed=2.0; this.hp=100; this.maxHp=100;
+                    this.phase=1; this.angle=0; this.reach=65; this.cooldown=0;
+                    this.charge=false; this.chargeTarget=null; this.stunTimer=0;
+                }
+                update(dt, playerRef) {
+                    if (this.stunTimer>0) { this.stunTimer-=dt; this.angle+=dt*8; return; }
+                    this.angle += dt*(12+this.phase*3);
+                    this.cooldown -= dt;
+                    if (this.hp<50 && this.phase===1) { this.phase=2; this.speed=2.8; }
+                    if (this.charge) {
+                        const ang = Math.atan2(this.chargeTarget.y-this.y, this.chargeTarget.x-this.x);
+                        this.x += Math.cos(ang)*6*dt*60;
+                        this.y += Math.sin(ang)*6*dt*60;
+                        if (Math.hypot(this.x-this.chargeTarget.x, this.y-this.chargeTarget.y)<30 || this.cooldown<-1) {
+                            this.charge=false; this.cooldown=1.5;
+                        }
+                    } else if (playerRef && this.cooldown<=0) {
+                        const d = Math.hypot(this.x-playerRef.x, this.y-playerRef.y);
+                        if (d<350) {
+                            this.chargeTarget = {x:playerRef.x, y:playerRef.y};
+                            this.charge = true;
+                            this.cooldown = 2.5 - this.phase*0.5;
+                        } else {
+                            const ang = Math.atan2(playerRef.y-this.y, playerRef.x-this.x);
+                            this.x += Math.cos(ang)*this.speed*dt*60;
+                            this.y += Math.sin(ang)*this.speed*dt*60;
+                        }
+                    }
+                    this.x = Math.max(this.radius, Math.min(W-this.radius, this.x));
+                    this.y = Math.max(this.radius, Math.min(H-this.radius, this.y));
+                }
+                draw(ctx) {
+                    if (assets.boss.complete && assets.boss.naturalWidth > 0) {
+                        ctx.save();
+                        ctx.translate(this.x, this.y);
+                        if (this.chargeTarget && this.chargeTarget.x < this.x) {
+                            ctx.scale(-1, 1);
+                        }
+                        const bob = Math.sin(Date.now()*0.01) * 3;
+                        ctx.drawImage(assets.boss, -this.radius, -this.radius + bob, this.radius * 2, this.radius * 2);
+                        ctx.restore();
+                    } else {
+                        ctx.fillStyle = '#ff4757';
+                        ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill();
+                        ctx.strokeStyle = '#f1c40f'; ctx.lineWidth=4; ctx.stroke();
+                        ctx.fillStyle = '#fff'; ctx.font='20px sans-serif'; ctx.textAlign='center';
+                        ctx.fillText('BOSS', this.x, this.y+7);
+                    }
+                    
+                    ctx.fillStyle = '#2f3542';
+                    ctx.fillRect(this.x - 40, this.y - this.radius - 20, 80, 10);
+                    ctx.fillStyle = '#ff4757';
+                    ctx.fillRect(this.x - 40, this.y - this.radius - 20, 80 * (this.hp / this.maxHp), 10);
+                    ctx.strokeStyle = '#fff';
+                    ctx.strokeRect(this.x - 40, this.y - this.radius - 20, 80, 10);
+                }
+                hit(dmg) { 
+                    this.hp -= dmg; 
+                    this.stunTimer=0.8; 
+                    this.charge=false; 
+                    if (this.hp<=0) this.hp=0; 
+                    cameraShake = 15;
+                    
+                    for(let i=0; i<15; i++) {
+                        particles.push({
+                            x: this.x, y: this.y,
+                            color: '#ff4757', life: 1.0,
+                            vx: (Math.random()-0.5)*200, vy: (Math.random()-0.5)*200,
+                            radius: 4,
+                            update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                            draw(ctx) { ctx.globalAlpha = this.life; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                            alive() { return this.life>0; }
+                        });
+                    }
+                }
+            }
+
+            // =============== INICIALIZACIÓN ===============
+            function initLevel(lvl) {
+                const cfg = getLevelConfig(lvl);
+                citizens = []; policeUnits = []; safeZones = []; particles = []; flag = null; boss = null;
+                mobilization = { active:false, timer:0, outcomeState:null };
+                floatingMessages = [];
+                comboStreak = 0; comboMultiplier = 1;
+                levelTimer = cfg.timeLimit; levelTimeLimit = cfg.timeLimit;
+                
+                const focusData = RESISTANCE_FOCUS[lvl];
+                resistanceFocus = new SafeZone(W*0.25, H*0.5, 60, true, focusData.name, focusData.message);
+                
+                player = new Player(resistanceFocus.x, resistanceFocus.y);
+
+                for (let i=0; i<cfg.citizens; i++) {
+                    citizens.push(new Citizen(W*0.3+Math.random()*W*0.5, 30+Math.random()*(H-60), cfg.type));
+                }
+                for (let i=0; i<cfg.police; i++) {
+                    policeUnits.push(new PoliceUnit(W*0.6+Math.random()*W*0.3, 40+Math.random()*(H-80), cfg.policeSpeed));
+                }
+                currentLevel = lvl;
+                gameState = STATE.PLAYING;
+                cameraShake = 0;
+            }
+            function initBossLevel() {
+                const cfg = { citizens:22, police:3, policeSpeed:1.6, citizenSpeed:1.4, timeLimit:75, required:15, type:'mixto' };
+                citizens = []; policeUnits = []; safeZones = []; particles = []; flag = null;
+                mobilization = { active:false, timer:0, outcomeState:null };
+                floatingMessages = [];
+                comboStreak = 0; comboMultiplier = 1;
+                boss = new Boss(W*0.75, H*0.5);
+                levelTimer = cfg.timeLimit; levelTimeLimit = cfg.timeLimit;
+                
+                const bossFocus = RESISTANCE_FOCUS[BOSS_LEVEL_NUM];
+                resistanceFocus = new SafeZone(W*0.25, H*0.5, 60, true, bossFocus.name, bossFocus.message);
+                
+                player = new Player(resistanceFocus.x, resistanceFocus.y);
+                
+                const allTypes = ['jubilado','discapacitado','cientifico','feminista','universitario'];
+                for (let i=0; i<cfg.citizens; i++) {
+                    citizens.push(new Citizen(W*0.2+Math.random()*W*0.5, 30+Math.random()*(H-60), allTypes[Math.floor(Math.random()*allTypes.length)]));
+                }
+                for (let i=0; i<cfg.police; i++) policeUnits.push(new PoliceUnit(W*0.7+i*60, H*0.4+i*60, cfg.policeSpeed));
+                
+                const prevLevels = [1,2,3,4,5];
+                const positions = [
+                    {x:W*0.7, y:H*0.25}, {x:W*0.7, y:H*0.55}, {x:W*0.7, y:H*0.85},
+                    {x:W*0.45, y:H*0.85}, {x:W*0.15, y:H*0.85}
+                ];
+                prevLevels.forEach((lvl, i) => {
+                    const fd = RESISTANCE_FOCUS[lvl];
+                    if (fd) {
+                        const pos = positions[i] || {x:W*0.5, y:H*0.5};
+                        safeZones.push(new SafeZone(pos.x, pos.y, 40, true, fd.name, '')); 
+                    }
+                });
+                currentLevel = BOSS_LEVEL_NUM;
+                gameState = STATE.BOSS_INTRO;
+                bossIntroTimer = 0;
+                cameraShake = 0;
+            }
+            function updateHUD(cfg) {
+                hudCitizens.textContent = player.getStrength();
+                hudLevelTitle.textContent = LEVEL_TITLES[currentLevel] || `Nivel ${currentLevel}`;
+                hudPolice.textContent = policeUnits.filter(p=>p.stunTimer<=0).length;
+                hudShelter.textContent = resistanceFocus ? resistanceFocus.name : '—';
+                const req = cfg ? cfg.required : bossFlagRequired;
+                hudRequired.textContent = req;
+                hudStrength.textContent = player.getStrength();
+                hudScore.textContent = score;
+                const t = Math.max(0, Math.ceil(levelTimer));
+                hudTimer.textContent = Math.floor(t/60) + ':' + ('0'+(t%60)).slice(-2);
+                hudTimerPanel.classList.toggle('danger', t <= 10);
+                hudLives.textContent = '❤'.repeat(Math.max(0, lives));
+                hudCombo.textContent = '×' + comboMultiplier;
+                hudComboPanel.classList.toggle('combo-active', comboMultiplier > 1);
+                hudProgress.style.width = Math.min(100, (player.getStrength()/req)*100) + '%';
+            }
+
+            // =============== COLISIONES ===============
+            function playerCollect() {
+                for (let c of citizens) {
+                    if (c.collected || c.scatter>0) continue;
+                    if (Math.hypot(player.x-c.x, player.y-c.y) < player.radius+c.radius) {
+                        player.addCitizen(c);
+                        citizens.splice(citizens.indexOf(c),1);
+                        comboStreak++;
+                        if (comboStreak % 5 === 0 && comboMultiplier < 3) {
+                            comboMultiplier++;
+                            floatingMessages.push({ text:'¡COMBO ×'+comboMultiplier+'!', life:1.2, color:'#eccc68', x:player.x, y:player.y-44 });
+                        }
+                        score += 10 * comboMultiplier;
+                        floatingMessages.push({ text:'+'+(10*comboMultiplier), life:0.7, color:'#eccc68', x:c.x, y:c.y-22, small:true });
+                        const req = (currentLevel <= MAX_REGULAR_LEVELS) ? getLevelConfig(currentLevel).required : bossFlagRequired;
+                        if (player.getStrength() > req) {
+                            levelTimer += 3;
+                            floatingMessages.push({ text:'+3s', life:0.8, color:'#2ed573', x:player.x, y:player.y-62, small:true });
+                        }
+                        break;
+                    }
+                }
+            }
+            function policeCapture() {
+                for (let p of policeUnits) {
+                    if (p.stunTimer>0) continue;
+                    for (let c of citizens) {
+                        if (c.collected||c.scatter>0) continue;
+                        if (Math.hypot(p.x-c.x, p.y-c.y) < p.radius+c.radius) { c.scatter=2; }
+                    }
+                    if (player.getStrength()>0 && Math.hypot(p.x-player.x, p.y-player.y) < p.radius+player.radius+10) {
+                        if (player.shield) { 
+                            p.stun(1.5); 
+                            cameraShake = 5;
+                            for(let i=0; i<8; i++) {
+                                particles.push({
+                                    x: p.x, y: p.y,
+                                    color: '#2ed573', life: 0.4,
+                                    vx: (Math.random()-0.5)*150, vy: (Math.random()-0.5)*150,
+                                    radius: 3,
+                                    update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                                    draw(ctx) { ctx.globalAlpha = this.life*2; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                                    alive() { return this.life>0; }
+                                });
+                            }
+                        }
+                        else if (player.invuln<=0) { player.loseCitizens(Math.min(3, player.getStrength())); resetCombo(); }
+                    }
+                }
+            }
+            function resetCombo() {
+                comboStreak = 0;
+                if (comboMultiplier > 1) {
+                    floatingMessages.push({ text:'Combo perdido', life:1.0, color:'#ff6b81', x:player.x, y:player.y-40, small:true });
+                }
+                comboMultiplier = 1;
+            }
+            function checkNearMiss() {
+                for (let p of policeUnits) {
+                    if (p.stunTimer > 0) continue;
+                    const d = Math.hypot(player.x-p.x, player.y-p.y);
+                    const hitDist = player.radius + p.radius + 8;
+                    if (d > hitDist && d < hitDist + 28 && p.nearMissCd <= 0) {
+                        p.nearMissCd = 1.5;
+                        score += 50 * comboMultiplier;
+                        playBeep(1400, 0.07, 'sine', 0.06);
+                        floatingMessages.push({ text:'+'+(50*comboMultiplier)+' ¡Cerca!', life:0.9, color:'#7bed9f', x:player.x, y:player.y-34, small:true });
+                    }
+                }
+            }
+            function safeZoneProtect() {
+                if (resistanceFocus && resistanceFocus.active) {
+                    const insideMain = resistanceFocus.contains(player.x, player.y, player.radius);
+                    if (insideMain && !resistanceFocus.messageShown) {
+                        floatingMessages.push({
+                            text: resistanceFocus.message, life: 9999, color: '#2ed573',
+                            x: W/2, y: H/2 - 60, id: 'resistance'
+                        });
+                        resistanceFocus.messageShown = true;
+                    } else if (!insideMain && resistanceFocus.messageShown) {
+                        resistanceFocus.messageShown = false;
+                        floatingMessages = floatingMessages.filter(m => m.id !== 'resistance');
+                    }
+                    if (insideMain) {
+                        player.invuln = Math.max(player.invuln, 0.4);
+                        for (let p of policeUnits) if (resistanceFocus.contains(p.x,p.y,p.radius)) p.stun(0.5);
+                    }
+                }
+                for (let sz of safeZones) {
+                    if (!sz.active) continue;
+                    if (sz.contains(player.x, player.y, player.radius)) {
+                        player.invuln = Math.max(player.invuln, 0.3);
+                        for (let p of policeUnits) if (sz.contains(p.x,p.y,p.radius)) p.stun(0.5);
+                    }
+                }
+            }
+            function checkFlagSpawn(required) {
+                if (flag || mobilization.active) return;
+                if (player.getStrength() >= required) {
+                    flag = new Flag(Math.random()<0.5?60:W-60, H*0.3+Math.random()*H*0.4);
+                    sfxFlagSpawn();
+                    
+                    floatingMessages.push({
+                        text: FLAG_MESSAGES[currentLevel] || "¡LA BANDERA HA APARECIDO!", 
+                        life: 4, color: '#ff4757',
+                        x: W/2, y: H/4, id: 'flag_spawn'
+                    });
+                }
+            }
+            function checkFlagCollection() {
+                if (!flag || mobilization.active) return false;
+                if (Math.hypot(player.x-flag.poleX, player.y-(flag.poleY+25)) < 40) {
+                    mobilization.active = true;
+                    mobilization.timer = 3.0;
+                    flag = null;
+                    sfxMobilization();
+                    mobilization.outcomeState = gameState === STATE.BOSS_BATTLE ? STATE.VICTORY : STATE.LEVEL_COMPLETE;
+                    cameraShake = 20;
+                    return true;
+                }
+                return false;
+            }
+
+            function spawnTideParticle() {
+                const colors = ['#ff4757','#ff6b81','#ffffff'];
+                particles.push({
+                    x: -50, y: Math.random()*H,
+                    color: colors[Math.floor(Math.random()*3)], life: 3,
+                    vx: 400+Math.random()*300, vy: (Math.random()-0.5)*80,
+                    radius: 8 + Math.random()*6, isTide: true,
+                    update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                    draw(ctx) {
+                        ctx.globalAlpha = Math.min(1, this.life);
+                        ctx.fillStyle = this.color;
+                        ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill();
+                        ctx.globalAlpha = 1;
+                    },
+                    alive() { return this.life>0; }
+                });
+            }
+
+            // =============== RENDER ===============
+            function drawBossTaunt(c2) {
+                c2.font = `bold ${Math.min(15, Math.max(11, W/55))}px "Inter", sans-serif`;
+                const tw = c2.measureText(bossTauntText).width;
+                const bx = boss.x, by = boss.y - boss.radius - 48;
+                c2.fillStyle = 'rgba(255,255,255,0.92)';
+                c2.beginPath(); c2.roundRect(bx - tw/2 - 12, by - 14, tw + 24, 28, 8); c2.fill();
+                c2.beginPath(); c2.moveTo(bx - 6, by + 13); c2.lineTo(bx + 8, by + 13); c2.lineTo(bx + 2, by + 24); c2.closePath(); c2.fill();
+                c2.fillStyle = '#111'; c2.textAlign = 'center'; c2.textBaseline = 'middle';
+                c2.fillText(bossTauntText, bx, by + 1);
+                c2.textBaseline = 'alphabetic';
+            }
+            function drawWorld() {
+                ctx.clearRect(0, 0, W, H);
+                
+                ctx.save();
+                if (cameraShake > 0) {
+                    const sx = (Math.random()-0.5)*cameraShake;
+                    const sy = (Math.random()-0.5)*cameraShake;
+                    ctx.translate(sx, sy);
+                }
+
+                if (resistanceFocus && resistanceFocus.active) resistanceFocus.draw(ctx);
+                safeZones.forEach(s=>s.active&&s.draw(ctx));
+                
+                citizens.forEach(c=>!c.collected&&c.draw(ctx));
+                if (player) player.collected.forEach(c=>c.drawCollected(ctx, c.x, c.y));
+                
+                policeUnits.forEach(p=>p.draw(ctx));
+                if (player) player.draw(ctx);
+                if (boss && (gameState===STATE.BOSS_BATTLE||gameState===STATE.BOSS_INTRO)) boss.draw(ctx);
+                if (bossTauntText && gameState===STATE.BOSS_BATTLE && bossTauntTimer > 2 && boss) drawBossTaunt(ctx);
+                if (flag) flag.draw(ctx);
+                
+                particles.forEach(p=>p.draw(ctx));
+                
+                ctx.restore();
+
+                floatingMessages.forEach(m=>{
+                    if (m.small) {
+                        ctx.font = `bold ${Math.min(14, Math.max(10, W/60))}px "Inter", sans-serif`;
+                    } else if (m.id === 'flag_spawn') {
+                        ctx.font = `bold ${Math.min(18, Math.max(12, W/45))}px "Press Start 2P", cursive`;
+                    } else {
+                        ctx.font = `bold ${Math.min(20, Math.max(14, W/35))}px "Inter", sans-serif`;
+                    }
+                    ctx.textAlign = 'center';
+                    
+                    const lines = m.text.split('\n');
+                    const lineHeight = m.id === 'flag_spawn' ? Math.min(24, Math.max(16, W/35)) : Math.min(26, Math.max(18, W/30));
+                    
+                    lines.forEach((line, i) => {
+                        const ly = m.y + (i - (lines.length-1)/2)*lineHeight;
+                        ctx.fillStyle = '#000'; // shadow
+                        ctx.fillText(line, m.x+2, ly+2);
+                        ctx.fillStyle = m.color;
+                        ctx.fillText(line, m.x, ly);
+                    });
+                });
+            }
+
+            function drawOverlay(title, subtitle, actionText, bgAlpha = 0.8) {
+                ctx.fillStyle = `rgba(20, 20, 36, ${bgAlpha})`; 
+                ctx.fillRect(0,0,W,H);
+                
+                ctx.fillStyle = '#ff4757'; 
+                let titleSize = Math.min(26, W / 26);
+                ctx.font = `bold ${titleSize}px "Press Start 2P", cursive`; 
+                ctx.textAlign = 'center';
+                ctx.shadowColor = '#000'; ctx.shadowBlur = 8;
+                
+                if (title === 'UNIDAD CONTRA EL PRESIDENTE') {
+                     ctx.fillText('UNIDAD CONTRA EL', W/2, H*0.35 - titleSize/2 - 5);
+                     ctx.fillText('PRESIDENTE', W/2, H*0.35 + titleSize/2 + 5);
+                     
+                     ctx.fillStyle = '#a0a0a0'; 
+                     ctx.font = `${Math.min(12, Math.max(9, W/50))}px "Inter", sans-serif`;
+                     ctx.shadowBlur = 0;
+                     ctx.fillText('Música: La Internacional (8-bit) por Red & Black Archive (RednBlackArchive)', W/2, H - 25);
+                } else if (title === 'LA ORGANIZACIÓN FRACASÓ') {
+                     ctx.fillText('LA ORGANIZACIÓN', W/2, H*0.35 - titleSize/2 - 5);
+                     ctx.fillText('FRACASÓ', W/2, H*0.35 + titleSize/2 + 5);
+                } else {
+                     ctx.fillText(title, W/2, H*0.35);
+                }
+                
+                if (subtitle) {
+                    ctx.fillStyle = '#e0e0e0'; 
+                    ctx.font = `${Math.min(18, Math.max(12, W/40))}px "Inter", sans-serif`;
+                    ctx.shadowBlur = 4;
+                    ctx.fillText(subtitle, W/2, H*0.55);
+                }
+                
+                ctx.fillStyle = '#2ed573'; 
+                ctx.font = `bold ${Math.min(16, Math.max(10, W/45))}px "Press Start 2P", cursive`;
+                ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
+                ctx.fillText(actionText, W/2, H*0.75);
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+
+            // =============== BUCLE ===============
+            let lastTime = performance.now();
+            function loop(now) {
+                resizeCanvas();
+                let dt = Math.min(0.1, (now-lastTime)/1000);
+                lastTime = now;
+                const cfg = currentLevel <= MAX_REGULAR_LEVELS ? getLevelConfig(currentLevel) : null;
+                
+                if (cameraShake > 0) cameraShake = Math.max(0, cameraShake - dt*30);
+
+                if (gameState === STATE.MENU) {
+                    drawWorld();
+                    drawOverlay('UNIDAD CONTRA EL PRESIDENTE', `Organizá a los sectores populares y resistí. Récord: ${highScore}`, 'HAZ CLIC PARA EMPEZAR');
+                }
+                else if (gameState === STATE.TUTORIAL) {
+                    drawWorld();
+                    ctx.fillStyle = `rgba(20, 20, 36, 0.9)`; ctx.fillRect(0,0,W,H);
+                    let titleSize = Math.min(26, W / 26);
+                    ctx.fillStyle='#f1c40f'; ctx.font=`bold ${titleSize}px "Press Start 2P", cursive`; ctx.textAlign='center';
+                    ctx.fillText('INSTRUCCIONES', W/2, H*0.15);
+                    
+                    ctx.fillStyle='#e0e0e0'; ctx.font=`${Math.min(16, Math.max(12, W/50))}px "Inter", sans-serif`;
+                    const lines = [
+                        '🚔 POLICÍAS: Te persiguen. Quitan ciudadanos.',
+                        '',
+                        '🛡️ ZONA SEGURA: Círculos verdes. Estás a salvo aquí.',
+                        '',
+                        '👥 CIUDADANOS: Tocalos para organizarlos.',
+                        '',
+                        '🚩 BANDERA: Aparece al juntar los necesarios.',
+                        'Al tocarla, una marea popular barre la represión.',
+                        '',
+                        'Controles: W A S D / Flechas'
+                    ];
+                    lines.forEach((line,i)=> ctx.fillText(line, W/2, H*0.28 + i*Math.min(30, W/30)));
+                    
+                    ctx.fillStyle = '#2ed573'; 
+                    ctx.font = `bold ${Math.min(16, Math.max(10, W/45))}px "Press Start 2P", cursive`;
+                    ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
+                    ctx.fillText('HAZ CLIC PARA JUGAR', W/2, H*0.88);
+                    ctx.globalAlpha = 1;
+                }
+                else if (gameState === STATE.PLAYING || gameState === STATE.BOSS_BATTLE) {
+                    player.update(dt);
+                    citizens.forEach(c=>c.update(dt, cfg||getLevelConfig(5)));
+                    policeUnits.forEach(p=>p.update(dt, player, cfg||getLevelConfig(5)));
+                    if (resistanceFocus) resistanceFocus.update(dt);
+                    safeZones.forEach(s=>s.update(dt));
+                    if (flag) flag.update(dt);
+                    levelTimer -= dt;
+
+                    if (mobilization.active) {
+                        mobilization.timer -= dt;
+                        for (let i=0;i<12;i++) spawnTideParticle();
+                        for (let p of policeUnits) {
+                            if (p.stunTimer>0) continue;
+                            for (let pt of particles) {
+                                if (pt.isTide && Math.hypot(pt.x-p.x, pt.y-p.y) < pt.radius+p.radius) {
+                                    p.stun(10); pt.life = 0; break;
+                                }
+                            }
+                        }
+                        if (gameState === STATE.BOSS_BATTLE && boss) {
+                            for (let pt of particles) {
+                                if (pt.isTide && Math.hypot(pt.x-boss.x, pt.y-boss.y) < pt.radius+boss.radius) {
+                                    boss.hit(0.5);
+                                    pt.life = 0;
+                                }
+                            }
+                            if (boss.hp > 0) boss.hp -= dt * 40;
+                        }
+
+                        if (mobilization.timer <= 0) {
+                            policeUnits.forEach(p=>p.stun(999));
+                            mobilization.active = false;
+                            
+                            gameState = mobilization.outcomeState;
+                            if (gameState === STATE.LEVEL_COMPLETE) { score+=300*currentLevel; sfxVictory(); }
+                            else if (gameState === STATE.VICTORY) { score+=1000; sfxVictory(); }
+                        }
+                    }
+
+                    if (!mobilization.active) {
+                        playerCollect();
+                        policeCapture();
+                        safeZoneProtect();
+                        checkNearMiss();
+                        if (gameState === STATE.PLAYING && cfg) {
+                            checkFlagSpawn(cfg.required);
+                        } else if (gameState === STATE.BOSS_BATTLE) {
+                            boss.update(dt, player);
+                            bossTauntTimer -= dt;
+                            if (bossTauntTimer <= 0) {
+                                let next = bossTauntText;
+                                while (next === bossTauntText) next = BOSS_TAUNTS[Math.floor(Math.random()*BOSS_TAUNTS.length)];
+                                bossTauntText = next; bossTauntTimer = 7;
+                            }
+                            checkFlagSpawn(bossFlagRequired); 
+                        }
+                        checkFlagCollection();
+                    }
+
+                    particles = particles.filter(p=>p.alive ? (p.update(dt), true) : false);
+                    floatingMessages.forEach(m=>{ if (m.life < 1000) m.life -= dt; if (m.small) m.y -= 24*dt; });
+                    floatingMessages = floatingMessages.filter(m=>m.life>0);
+
+                    if (levelTimer <= 0 && !mobilization.active) {
+                        if ((cfg && player.getStrength() >= cfg.required) || (gameState===STATE.BOSS_BATTLE && flag)) {
+                            if (gameState===STATE.PLAYING) { gameState=STATE.LEVEL_COMPLETE; score+=200*currentLevel; sfxVictory(); }
+                        } else {
+                            lives--;
+                            if (lives<=0) gameState=STATE.GAME_OVER;
+                            else initLevel(currentLevel);
+                        }
+                    }
+                    updateHUD(cfg);
+                    drawWorld();
+                }
+                else if (gameState === STATE.BOSS_INTRO) {
+                    drawWorld();
+                    drawOverlay('¡EL PRESIDENTE APARECE!', 'Todos los sectores unidos en la lucha final.', 'PREPÁRATE');
+                    bossIntroTimer += dt;
+                    if (bossIntroTimer>3 || keys[' ']||keys['enter']) {
+                        gameState = STATE.BOSS_BATTLE;
+                        bossIntroTimer = 0;
+                    }
+                }
+                else if (gameState === STATE.LEVEL_COMPLETE) {
+                    drawWorld();
+                    let msg = LEVEL_TITLES[currentLevel].replace('Organicemos a los ','').replace('Unamos a los ','').replace('Unamos a las ','').replace('Despertemos a los ','').toUpperCase();
+                    drawOverlay(`¡${msg} ORGANIZADOS!`, `Completaste el Nivel ${currentLevel}`, 'SIGUIENTE NIVEL');
+                }
+                else if (gameState === STATE.GAME_OVER) {
+                    drawWorld();
+                    const rec = saveHighScore();
+                    drawOverlay('LA ORGANIZACIÓN FRACASÓ', `La represión fue demasiado fuerte. Puntaje: ${score}` + (rec ? ' ¡Nuevo récord!' : ` · Récord: ${highScore}`), 'VOLVER A INTENTAR');
+                    drawShareHint();
+                }
+                else if (gameState === STATE.VICTORY) {
+                    drawWorld();
+                    const rec = saveHighScore();
+                    drawOverlay('¡VICTORIA TOTAL!', `El presidente fue derrotado gracias a la unidad. Puntaje: ${score}` + (rec ? ' ¡Nuevo récord!' : ` · Récord: ${highScore}`), 'JUGAR DE NUEVO');
+                    drawShareHint();
+                }
+
+                requestAnimationFrame(loop);
+            }
+
+            function saveHighScore() {
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('agrupe_highscore', String(highScore));
+                    return true;
+                }
+                return false;
+            }
+            function drawShareHint() {
+                ctx.fillStyle = 'rgba(224,224,224,0.75)';
+                ctx.font = `${Math.min(12, Math.max(9, W/60))}px "Inter", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText("Presioná 'C' para copiar tu puntaje y desafiar a otrx", W/2, H*0.83);
+            }
+            function shareScore() {
+                const text = `Me puse ${score} pts en "Unidad contra el Presidente Anarcocapitalista" 🚩 ¿Me superás? https://piquelin.github.io/inti-utiles/Agrupemonos_vivecode_v0.7.html`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(()=>{
+                        floatingMessages.push({ text:'¡Puntaje copiado al portapapeles!', life:1.6, color:'#2ed573', x:W/2, y:H*0.78, small:true });
+                    }).catch(()=>{});
+                }
+            }
+            function handleClick() {
+                initAudio();
+                const bgm = document.getElementById('bgm');
+                if (bgm && bgm.paused) {
+                    bgm.volume = 0.25;
+                    bgm.play().catch(e => console.log('Autoplay audio prevented by browser'));
+                }
+
+                if (gameState === STATE.MENU) gameState = STATE.TUTORIAL;
+                else if (gameState === STATE.TUTORIAL) { initLevel(1); score=0; lives=3; }
+                else if (gameState === STATE.LEVEL_COMPLETE) {
+                    if (currentLevel < MAX_REGULAR_LEVELS) initLevel(currentLevel+1);
+                    else initBossLevel();
+                }
+                else if (gameState === STATE.BOSS_INTRO) { gameState = STATE.BOSS_BATTLE; bossIntroTimer = 0; }
+                else if (gameState === STATE.GAME_OVER || gameState === STATE.VICTORY) { gameState = STATE.MENU; score=0; lives=3; currentLevel=1; }
+            }
+
+            canvas.addEventListener('click', handleClick);
+            window.addEventListener('keydown', e => {
+                initAudio();
+                keys[e.key.toLowerCase()] = true;
+                if (e.key.toLowerCase()==='c' && (gameState===STATE.GAME_OVER||gameState===STATE.VICTORY)) shareScore();
+                if (e.key===' '||e.key==='Enter') handleClick();
+            });
+            window.addEventListener('keyup', e => { keys[e.key.toLowerCase()]=false; });
+            resizeCanvas();
+            gameState = STATE.MENU;
+            requestAnimationFrame(loop);
+        })();
+    </script>
+</body>
+</html>
