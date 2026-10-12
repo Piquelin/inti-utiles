@@ -35,57 +35,164 @@
         #game-container {
             position: relative;
             width: 95vw;
-            max-width: 1000px;
-            aspect-ratio: 16/10;
-            max-height: 90vh;
+            max-width: 1200px;
+            aspect-ratio: 16/11;
+            max-height: 94vh;
             border: 3px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
             background: #111;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 71, 87, 0.2);
+            display: flex;
+            flex-direction: column;
         }
-        canvas { 
-            display: block; 
-            width: 100%; 
-            height: 100%; 
-            image-rendering: pixelated;
-        }
-        #ui-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            pointer-events: none; display: flex; flex-direction: column;
-            justify-content: space-between; padding: 12px 16px;
-        }
-        #hud { 
-            display: flex; 
-            justify-content: space-between; 
-            gap: 10px; 
-            flex-wrap: wrap; 
+        /* ============ HUD SUPERIOR (fuera del canvas) ============ */
+        #hud {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 6px 8px;
+            background: linear-gradient(180deg, rgba(30,30,45,0.98), rgba(15,15,25,0.98));
+            border-bottom: 2px solid var(--border);
+            z-index: 5;
         }
         .hud-panel {
             background: var(--panel-bg); 
             border: 2px solid var(--border);
-            border-radius: 8px; 
-            padding: 8px 14px; 
+            border-radius: 6px; 
+            padding: 5px 10px; 
             color: var(--text);
-            font-size: 14px; 
+            font-size: 11px; 
             font-weight: 700;
-            backdrop-filter: blur(8px); 
             pointer-events: auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
+            white-space: nowrap;
         }
-        .hud-panel span { color: var(--accent); font-family: 'Press Start 2P', cursive; font-size: 10px; margin-left: 4px; }
+        .hud-panel span { color: var(--accent); font-family: 'Press Start 2P', cursive; font-size: 9px; margin-left: 2px; }
         .hud-panel.danger span { color: var(--danger); }
         .hud-panel.safe span { color: var(--safe); }
-        .emoji-icon { font-size: 1.2em; }
-        .hud-panel .progress-track { width: 70px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; flex: none; }
+        .hud-panel.timer-panel span { color: #eccc68; font-size: 11px; }
+        .emoji-icon { font-size: 1em; }
+        .hud-panel .progress-track { width: 60px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; flex: none; }
         .hud-panel .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.2s ease-out; }
         .hud-panel.combo-active span:last-child { color: #eccc68; }
-        #hud-lives { font-family: 'Inter', sans-serif; font-size: 13px; letter-spacing: 2px; }
+        #hud-lives { font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 2px; }
+        #hud-level-title { font-family: 'Inter', sans-serif; text-transform: none; }
+
+        /* ============ CANVAS ============ */
+        #canvas-wrapper {
+            flex: 1 1 auto;
+            position: relative;
+            min-height: 0;
+            background: #111;
+            overflow: hidden;
+        }
+        canvas { 
+            position: absolute;
+            inset: 0;
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+            image-rendering: pixelated;
+            touch-action: none;
+        }
+
+        /* ============ BOTÓN MUTE ============ */
+        #mute-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 12px;
+            cursor: pointer;
+            z-index: 20;
+            padding: 6px 10px;
+        }
+
+        /* ============ MODALES ============ */
+        .modal-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 10, 20, 0.95);
+            z-index: 200;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            backdrop-filter: blur(6px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-overlay h2 {
+            color: var(--accent);
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(14px, 2.2vw, 22px);
+            margin-bottom: 16px;
+            text-shadow: 0 0 10px rgba(255,71,87,0.5);
+            line-height: 1.4;
+        }
+        .modal-overlay p { margin: 5px 0; font-size: clamp(12px, 1.6vw, 15px); }
+        .modal-overlay input {
+            padding: 10px 14px;
+            font-size: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: rgba(30,30,45,0.9);
+            color: var(--text);
+            outline: none;
+            margin: 12px 0;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            min-width: 220px;
+        }
+        .modal-overlay input:focus { border-color: var(--accent); }
+        .modal-overlay button {
+            padding: 12px 22px;
+            font-size: 12px;
+            font-family: 'Press Start 2P', cursive;
+            border: 2px solid var(--safe);
+            background: rgba(46,213,115,0.15);
+            color: var(--safe);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.15s;
+        }
+        .modal-overlay button:hover {
+            background: var(--safe);
+            color: #111;
+        }
+        .ranking-list {
+            width: 100%;
+            max-width: 520px;
+            max-height: 45vh;
+            overflow-y: auto;
+            margin: 10px 0;
+            padding: 4px;
+        }
+        .rank-row {
+            display: grid;
+            grid-template-columns: 34px 1fr auto auto;
+            gap: 10px;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 14px;
+            align-items: center;
+        }
+        .rank-row:first-child { color: #eccc68; font-weight: 700; }
+        .rank-pos { color: var(--accent); font-weight: 700; }
+        .rank-name { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rank-time { color: var(--safe); font-family: 'Press Start 2P', cursive; font-size: 10px; }
+        .rank-score { color: #eccc68; font-size: 12px; min-width: 70px; text-align: right; }
     </style>
 <base target="_blank">
 </head>
@@ -94,46 +201,44 @@
         <source src="internacional.mp3" type="audio/mpeg">
     </audio>
     <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="ui-overlay">
-            <div id="hud">
-                <div class="hud-panel"><span class="emoji-icon">👥</span> <span id="hud-citizens">0</span></div>
-                <div class="hud-panel"><span class="emoji-icon">📋</span> <span id="hud-level-title">Nivel 1</span></div>
-                <div class="hud-panel danger"><span class="emoji-icon">🚔</span> <span id="hud-police">0</span></div>
-                <div class="hud-panel safe"><span class="emoji-icon">🛡️</span> <span id="hud-shelter">—</span></div>
-                <div class="hud-panel"><span class="emoji-icon">🎯</span> Nec: <span id="hud-required">6</span></div>
-                <div class="hud-panel"><span class="emoji-icon">💪</span> Fza: <span id="hud-strength">0</span></div>
-                <div class="hud-panel"><span class="emoji-icon">🏆</span> <span id="hud-score">0</span></div>
-                <div class="hud-panel"><span class="emoji-icon">⏱️</span> <span id="hud-timer">0:55</span></div>
-                <div class="hud-panel"><span class="emoji-icon">❤️</span> <span id="hud-lives">3</span></div>
-                <div class="hud-panel" id="hud-combo-panel"><span class="emoji-icon">⚡</span> <span id="hud-combo">×1</span></div>
-                <div class="hud-panel"><span class="emoji-icon">🚩</span> <div class="progress-track"><div class="progress-fill" id="hud-progress"></div></div></div>
-            </div>
-            <div id="mute-btn" class="hud-panel" style="position: absolute; bottom: 12px; right: 16px; cursor: pointer; z-index: 10;">
-                <span class="emoji-icon">🔊</span>
-            </div>
+        <div id="hud">
+            <div class="hud-panel"><span class="emoji-icon">👥</span> <span id="hud-citizens">0</span></div>
+            <div class="hud-panel"><span class="emoji-icon">📋</span> <span id="hud-level-title">Nivel 1</span></div>
+            <div class="hud-panel danger"><span class="emoji-icon">🚔</span> <span id="hud-police">0</span></div>
+            <div class="hud-panel safe"><span class="emoji-icon">🛡️</span> <span id="hud-shelter">—</span></div>
+            <div class="hud-panel"><span class="emoji-icon">🎯</span> Nec: <span id="hud-required">6</span></div>
+            <div class="hud-panel timer-panel"><span class="emoji-icon">⏱️</span> <span id="hud-timer">0:00</span></div>
+            <div class="hud-panel"><span class="emoji-icon">❤️</span> <span id="hud-lives">3</span></div>
+            <div class="hud-panel" id="hud-combo-panel"><span class="emoji-icon">⚡</span> <span id="hud-combo">×1</span></div>
+            <div class="hud-panel"><span class="emoji-icon">🚩</span> <div class="progress-track"><div class="progress-fill" id="hud-progress"></div></div></div>
+            <div class="hud-panel" id="hud-inclusive-panel" style="display:none;"><span class="emoji-icon">🗣️</span> E: <span id="hud-inclusive">LISTO</span></div>
         </div>
+        <div id="canvas-wrapper">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        <div id="mute-btn" class="hud-panel"><span class="emoji-icon">🔊</span></div>
+        <div id="modal" class="modal-overlay"></div>
     </div>
     <script>
         (function() {
             // ==================== JUEGO COMPLETO ====================
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
-            const container = document.getElementById('game-container');
+            const wrapper = document.getElementById('canvas-wrapper');
 
             const hudCitizens = document.getElementById('hud-citizens');
             const hudLevelTitle = document.getElementById('hud-level-title');
             const hudPolice = document.getElementById('hud-police');
             const hudShelter = document.getElementById('hud-shelter');
             const hudRequired = document.getElementById('hud-required');
-            const hudStrength = document.getElementById('hud-strength');
-            const hudScore = document.getElementById('hud-score');
             const hudTimer = document.getElementById('hud-timer');
-            const hudTimerPanel = hudTimer.parentElement;
             const hudLives = document.getElementById('hud-lives');
             const hudCombo = document.getElementById('hud-combo');
             const hudComboPanel = document.getElementById('hud-combo-panel');
             const hudProgress = document.getElementById('hud-progress');
+            const hudInclusivePanel = document.getElementById('hud-inclusive-panel');
+            const hudInclusive = document.getElementById('hud-inclusive');
+            const modal = document.getElementById('modal');
             
             const muteBtn = document.getElementById('mute-btn');
             muteBtn.addEventListener('click', (e) => {
@@ -154,10 +259,12 @@
             // =============== CONFIGURACIÓN ===============
             const MAX_REGULAR_LEVELS = 5;
             const BOSS_LEVEL_NUM = MAX_REGULAR_LEVELS + 1;
+            //const BOSS_WAVE_CITIZENS = 7;
+			const BOSS_WAVES_AT = [10, 20, 30, 40]; // Umbrales acumulativos de ciudadanos para las olas
 
             const LEVEL_TITLES = {
                 1: "Organicemos a los discapacitados",
-				2: "Organicemos a los jubilados",
+                2: "Organicemos a los jubilados",
                 3: "Unamos a los científicos",
                 4: "Unamos a las feministas y diversidades",
                 5: "Despertemos a los estudiantes",
@@ -166,7 +273,7 @@
 
             const RESISTANCE_FOCUS = {
                 1: { name: "Congreso", message: "El Congreso vota la ley de emergencia en salud y discapacidad." },
-				2: { name: "Marcha Miércoles", message: "Jubilados se convocan para reclamar\npor una jubilación digna." },
+                2: { name: "Marcha Miércoles", message: "Jubilados se convocan para reclamar\npor una jubilación digna." },
                 3: { name: "INTI", message: "Trabajadores defienden la\nciencia y tecnología." },
                 4: { name: "8M", message: "Mujeres y diversidades se movilizan\n masivamente contra los femicidios\ny las políticas machistas." },
                 5: { name: "Universidad Pública", message: "Estudiantes y docentes\ndefienden la educación." },
@@ -174,7 +281,7 @@
             };
 
             const FLAG_MESSAGES = {
-				1: "¡Los discapacitados voltean\nel Veto del gobierno!",
+                1: "¡Los discapacitados voltean\nel Veto del gobierno!",
                 2: "¡Los Jubilados organizados\nse suman!",
                 3: "¡Los trabajadores voltean el decreto\nque centraliza al INTI y al INTA!",
                 4: "¡La marea verde vuelve\na ser protagonista y marca el camino!",
@@ -183,12 +290,10 @@
             };
 
             const BOSS_TAUNTS = [
-                "Esto es un montaje de la prensa.",
-                "¿Querés asado? Yo compro todo.",
-                "La motosierra no perdona.",
-                "Es culpa del gobierno anterior.",
-                "¡Vamo' a volver!",
-                "Los derechos se negocian, ¿o no?"
+                "¡AFUERA!",
+                "No hay plata.",
+                "El Estado es un crimen.",
+                "Viva la libertad, carajo."
             ];
             let bossTauntTimer = 3;
             let bossTauntText = '';
@@ -227,28 +332,42 @@
             function sfxVictory() { playBeep(523,0.15); setTimeout(()=>playBeep(659,0.15),150); setTimeout(()=>playBeep(784,0.25),300); }
             function sfxFlagSpawn() { playBeep(800,0.1,'sine',0.08); playBeep(1000,0.15,'sine',0.09); }
             function sfxMobilization() { playBeep(200,0.5,'square',0.12); playBeep(300,0.6,'triangle',0.1); }
+            function sfxInclusive() {
+                playBeep(330,0.12,'sine',0.09);
+                setTimeout(()=>playBeep(494,0.12,'sine',0.09),90);
+                setTimeout(()=>playBeep(659,0.22,'sine',0.1),180);
+            }
 
             // =============== ESTADOS ===============
             const STATE = {
                 MENU:'menu', TUTORIAL:'tutorial', PLAYING:'playing',
                 BOSS_INTRO:'boss_intro', BOSS_BATTLE:'boss_battle',
+                INCLUSIVE_UNLOCK:'inclusive_unlock',
                 LEVEL_COMPLETE:'level_complete', GAME_OVER:'game_over', VICTORY:'victory'
             };
             let gameState = STATE.MENU;
             let currentLevel = 1;
-            let score = 0;
+            let score = 0;                 // Solo se asigna al final
             let lives = 3;
             let comboStreak = 0;
             let comboMultiplier = 1;
             let highScore = parseInt(localStorage.getItem('agrupe_highscore') || '0', 10) || 0;
-            let levelTimer = 0, levelTimeLimit = 55;
+            let totalTime = 0;             // Contador general (sube)
+            let inclusiveUnlocked = false;
+            let inclusiveCooldown = 0;
+            let inclusiveFlash = 0;
+            let inclusiveFlashX = 0;
+            let inclusiveFlashY = 0;
+            let bossCitizensCaught = 0;
+            let bossWavesFired = 0;
+            let bossWave = { active:false, timer:0, pending:0 };
+            let bossSpawnTimer = 0;
             let player;
             let citizens = [], policeUnits = [], safeZones = [], particles = [];
             let resistanceFocus = null; 
             let boss = null;
             let flag = null;
-            const bossFlagRequired = 18;
-            let mobilization = { active: false, timer: 0, outcomeState: null };
+            let mobilization = { active: false, timer: 0, outcomeState: null, isFinal: false };
             let floatingMessages = [];
             let bossIntroTimer = 0;
             const keys = {};
@@ -258,21 +377,77 @@
 
             let W, H;
             function resizeCanvas() {
-                const rect = container.getBoundingClientRect();
-                W = Math.floor(rect.width * Math.min(window.devicePixelRatio || 1, 2));
-                H = Math.floor(rect.height * Math.min(window.devicePixelRatio || 1, 2));
-                if (canvas.width !== W || canvas.height !== H) {
-                    canvas.width = W; canvas.height = H;
+                const rect = wrapper.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) return;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                const newW = Math.floor(rect.width * dpr);
+                const newH = Math.floor(rect.height * dpr);
+                if (canvas.width !== newW || canvas.height !== newH) {
+                    canvas.width = newW;
+                    canvas.height = newH;
                 }
+                W = newW; H = newH;
+            }
+
+            // =============== UTILS ===============
+            function formatTime(t) {
+                const m = Math.floor(t / 60);
+                const s = Math.floor(t % 60);
+                return m + ':' + ('0'+s).slice(-2);
+            }
+            function escapeHtml(str) {
+                return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+            }
+            function getRanking() {
+                try {
+                    const r = JSON.parse(localStorage.getItem('agrupe_ranking') || '[]');
+                    return Array.isArray(r) ? r : [];
+                } catch(e) { return []; }
+            }
+            function saveToRanking(name, time, sc) {
+                const ranking = getRanking();
+                ranking.push({ name: String(name).slice(0,14), time: Number(time.toFixed(2)), score: Number(sc), date: Date.now() });
+                ranking.sort((a,b) => a.time - b.time);
+                const trimmed = ranking.slice(0, 20);
+                localStorage.setItem('agrupe_ranking', JSON.stringify(trimmed));
+                return trimmed;
+            }
+            // Más rápido = más puntos. Bonus por vidas restantes.
+            function computeFinalScore(isVictory) {
+                const base = isVictory ? 1000000 : 100000;
+                const timeScore = Math.round(base / Math.max(1, totalTime));
+                const livesBonus = lives * (isVictory ? 1000 : 100);
+                return timeScore + livesBonus;
+            }
+            function saveHighScore() {
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('agrupe_highscore', String(highScore));
+                    return true;
+                }
+                return false;
+            }
+            function setGameOver() {
+                if (gameState === STATE.GAME_OVER) return;
+                score = computeFinalScore(false);
+                saveHighScore();
+                gameState = STATE.GAME_OVER;
+            }
+            function setVictory() {
+                if (gameState === STATE.VICTORY) return;
+                score = computeFinalScore(true);
+                saveHighScore();
+                gameState = STATE.VICTORY;
+                showVictoryModal();
             }
 
             // =============== CLASES ===============
             class Player {
                 constructor(x, y) {
-                    this.x = x; this.y = y; this.radius = 16;
+                    this.x = x; this.y = y; this.radius = 22;
                     this.speed = 3.5; this.collected = []; this.trail = [];
                     this.invuln = 0; this.speedBoost = 0; this.shield = false; this.shieldTimer = 0;
-                    this.facing = 1; // 1 right, -1 left
+                    this.facing = 1;
                 }
                 update(dt) {
                     let dx = 0, dy = 0;
@@ -298,7 +473,7 @@
                         const idx = Math.min(i+3, this.trail.length-1);
                         const t = this.trail[this.trail.length-1-idx] || {x:this.x, y:this.y};
                         const angle = i*1.2 + Date.now()*0.002;
-                        const dist = 16 + (i%5)*8;
+                        const dist = 22 + (i%5)*8;
                         c.x += (t.x + Math.cos(angle)*dist - c.x) * 0.15;
                         c.y += (t.y + Math.sin(angle)*dist - c.y) * 0.15;
                     }
@@ -314,16 +489,13 @@
                     ctx.translate(this.x, this.y);
                     ctx.scale(this.facing, 1);
                     
-                    // Body
                     ctx.fillStyle = '#ff4757'; 
                     ctx.beginPath(); ctx.roundRect(-this.radius, -this.radius, this.radius*2, this.radius*2, 8); ctx.fill();
                     ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
                     
-                    // Face
                     ctx.fillStyle = '#ffeaa7';
                     ctx.beginPath(); ctx.roundRect(-this.radius+6, -this.radius+4, this.radius*2-8, this.radius, 4); ctx.fill();
                     
-                    // Megaphone
                     ctx.fillStyle = '#f1f2f6';
                     ctx.beginPath();
                     ctx.moveTo(this.radius, 0);
@@ -380,7 +552,7 @@
 
             class Citizen {
                 constructor(x, y, type) {
-                    this.x = x; this.y = y; this.radius = 16;
+                    this.x = x; this.y = y; this.radius = 22;
                     this.free = true; this.collected = false;
                     this.wanderAngle = Math.random()*Math.PI*2;
                     this.wanderTimer = Math.random()*3;
@@ -389,11 +561,11 @@
                     this.emoji = this.getEmoji();
                 }
                 getEmoji() {
-                    if (this.type === 'jubilado') return ['👴🏽','👵🏽','🧓🏼'][Math.floor(Math.random()*3)];
-                    if (this.type === 'discapacitado') return ['🧑🏽🦽','👩🏻🦽','👨🦽','🧑🦯'][Math.floor(Math.random()*4)];
-                    if (this.type === 'cientifico') return ['🧑🏽⚕️','👩🏽⚕️','👨🏻🔬'][Math.floor(Math.random()*3)];
-                    if (this.type === 'feminista') return ['👩🏽','👩🏻🎤','👩🏿🎤','👩🏽🦱'][Math.floor(Math.random()*4)];
-                    if (this.type === 'universitario') return ['👨🏽🎓','👩🏻🎓','🧑🎓','👩🏽🏫'][Math.floor(Math.random()*4)];
+                    if (this.type === 'jubilado') return ['👴🏽','👵🏽','🧓🏼', '👩🏽‍🦳'][Math.floor(Math.random()*4)];
+                    if (this.type === 'discapacitado') return ['👨‍🦽','👩🏻‍🦽','👩‍🦯','🧑🏼‍🦯'][Math.floor(Math.random()*4)];
+                    if (this.type === 'cientifico') return ['👩🏻‍⚕️','👩‍🔬','🔬','👨🏽‍🔬'][Math.floor(Math.random()*4)];
+                    if (this.type === 'feminista') return ['👩🏽','👩🏻','👩🏿','🦱','🪂','👬', '👭'][Math.floor(Math.random()*7)];
+                    if (this.type === 'universitario') return ['👩🏽‍🎓','👩🏻‍🏫','👩‍🔬','🧑🏻‍💼','👩🏻‍💼'][Math.floor(Math.random()*5)];
                     return '👤';
                 }
                 update(dt, config) {
@@ -413,7 +585,7 @@
                     ctx.fillStyle = '#ffffff'; ctx.fill();
                     ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
                     ctx.fillStyle = '#000';
-                    ctx.font = '20px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                    ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(this.emoji, this.x, this.y+2);
@@ -424,7 +596,7 @@
                     ctx.fillStyle = '#ff4757'; ctx.fill();
                     ctx.strokeStyle = '#ff6b81'; ctx.lineWidth = 2; ctx.stroke();
                     ctx.fillStyle = '#000';
-                    ctx.font = '20px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                    ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
                     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillText(this.emoji, 0, 2);
                     ctx.restore();
@@ -433,11 +605,12 @@
 
             class PoliceUnit {
                 constructor(x, y, speed) {
-                    this.x = x; this.y = y; this.radius = 16;
+                    this.x = x; this.y = y; this.radius = 22;
                     this.speed = speed; this.state = 'patrol'; this.stunTimer = 0;
                     this.patrolAngle = Math.random()*Math.PI*2; this.patrolTimer = 0;
                     this.facing = -1;
                     this.nearMissCd = 0;
+                    this.emoji = Math.random() < 0.5 ? '🧑🏻‍✈️' : '👩🏻‍✈️';
                 }
                 update(dt, playerRef, config) {
                     if (this.stunTimer>0) { this.stunTimer-=dt; return; }
@@ -473,28 +646,23 @@
                 draw(ctx) {
                     if (this.stunTimer>0 && Math.floor(this.stunTimer*15)%2===0) return;
                     
-                    ctx.save();
-                    ctx.translate(this.x, this.y);
-                    ctx.scale(this.facing, 1);
-                    
-                    // Body
-                    ctx.fillStyle = '#1e90ff';
-                    ctx.beginPath(); ctx.roundRect(-this.radius, -this.radius, this.radius*2, this.radius*2, 6); ctx.fill();
+                    // Fondo circular
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+                    ctx.fillStyle = '#1e90ff'; ctx.fill();
                     ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
                     
-                    // Shield
-                    ctx.fillStyle = '#2f3542';
-                    ctx.beginPath(); ctx.roundRect(this.radius-4, -this.radius-2, 6, this.radius*2+4, 2); ctx.fill();
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = '10px "Inter", sans-serif';
-                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText('P', this.radius-1, 0); 
-                    
-                    // Helmet visor
-                    ctx.fillStyle = '#111';
-                    ctx.fillRect(this.radius-10, -8, 8, 8);
+                    // Emoji
+                    ctx.fillStyle = '#000';
+                    ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.emoji, this.x, this.y+2);
 
-                    ctx.restore();
+                    // Indicador de stun
+                    if (this.stunTimer > 0.6) {
+                        ctx.font = '22px "Segoe UI Emoji", sans-serif';
+                        ctx.fillText('💬', this.x, this.y - this.radius - 10);
+                    }
                 }
                 stun(d) { this.stunTimer = d; this.state = 'stunned'; }
             }
@@ -636,10 +804,11 @@
             function initLevel(lvl) {
                 const cfg = getLevelConfig(lvl);
                 citizens = []; policeUnits = []; safeZones = []; particles = []; flag = null; boss = null;
-                mobilization = { active:false, timer:0, outcomeState:null };
+                mobilization = { active:false, timer:0, outcomeState:null, isFinal:false };
                 floatingMessages = [];
                 comboStreak = 0; comboMultiplier = 1;
-                levelTimer = cfg.timeLimit; levelTimeLimit = cfg.timeLimit;
+                inclusiveCooldown = 0;
+                bossWave = { active:false, timer:0, pending:0 };
                 
                 const focusData = RESISTANCE_FOCUS[lvl];
                 resistanceFocus = new SafeZone(W*0.25, H*0.5, 60, true, focusData.name, focusData.message);
@@ -657,13 +826,17 @@
                 cameraShake = 0;
             }
             function initBossLevel() {
-                const cfg = { citizens:22, police:3, policeSpeed:1.6, citizenSpeed:1.4, timeLimit:75, required:15, type:'mixto' };
+                const cfg = { citizens:22, police:3, policeSpeed:1.6, citizenSpeed:1.4, required:15, type:'mixto' };
                 citizens = []; policeUnits = []; safeZones = []; particles = []; flag = null;
-                mobilization = { active:false, timer:0, outcomeState:null };
+                mobilization = { active:false, timer:0, outcomeState:null, isFinal:false };
                 floatingMessages = [];
                 comboStreak = 0; comboMultiplier = 1;
+                inclusiveCooldown = 0;
+                bossCitizensCaught = 0;
+                bossWavesFired = 0;
+                bossWave = { active:false, timer:0, pending:0 };
+                bossSpawnTimer = 3.0;
                 boss = new Boss(W*0.75, H*0.5);
-                levelTimer = cfg.timeLimit; levelTimeLimit = cfg.timeLimit;
                 
                 const bossFocus = RESISTANCE_FOCUS[BOSS_LEVEL_NUM];
                 resistanceFocus = new SafeZone(W*0.25, H*0.5, 60, true, bossFocus.name, bossFocus.message);
@@ -698,17 +871,42 @@
                 hudLevelTitle.textContent = LEVEL_TITLES[currentLevel] || `Nivel ${currentLevel}`;
                 hudPolice.textContent = policeUnits.filter(p=>p.stunTimer<=0).length;
                 hudShelter.textContent = resistanceFocus ? resistanceFocus.name : '—';
-                const req = cfg ? cfg.required : bossFlagRequired;
+                
+                let req, current;
+                if (currentLevel <= MAX_REGULAR_LEVELS) {
+                    req = cfg ? cfg.required : 1;
+                    current = player.getStrength();
+				} else {
+					const idx = Math.min(bossWavesFired, BOSS_WAVES_AT.length - 1);
+					req = BOSS_WAVES_AT[idx];
+					current = Math.min(bossCitizensCaught, req);
+				}
+					/*
+                } else {
+                    req = BOSS_WAVE_CITIZENS;
+                    current = bossCitizensCaught % BOSS_WAVE_CITIZENS;
+                }
+				*/
                 hudRequired.textContent = req;
-                hudStrength.textContent = player.getStrength();
-                hudScore.textContent = score;
-                const t = Math.max(0, Math.ceil(levelTimer));
-                hudTimer.textContent = Math.floor(t/60) + ':' + ('0'+(t%60)).slice(-2);
-                hudTimerPanel.classList.toggle('danger', t <= 10);
+                hudProgress.style.width = Math.min(100, (current/req)*100) + '%';
+                
+                hudTimer.textContent = formatTime(totalTime);
                 hudLives.textContent = '❤'.repeat(Math.max(0, lives));
                 hudCombo.textContent = '×' + comboMultiplier;
                 hudComboPanel.classList.toggle('combo-active', comboMultiplier > 1);
-                hudProgress.style.width = Math.min(100, (player.getStrength()/req)*100) + '%';
+                
+                if (inclusiveUnlocked) {
+                    hudInclusivePanel.style.display = '';
+                    if (inclusiveCooldown > 0) {
+                        hudInclusive.textContent = inclusiveCooldown.toFixed(1) + 's';
+                        hudInclusivePanel.classList.add('danger');
+                    } else {
+                        hudInclusive.textContent = 'LISTO';
+                        hudInclusivePanel.classList.remove('danger');
+                    }
+                } else {
+                    hudInclusivePanel.style.display = 'none';
+                }
             }
 
             // =============== COLISIONES ===============
@@ -723,13 +921,24 @@
                             comboMultiplier++;
                             floatingMessages.push({ text:'¡COMBO ×'+comboMultiplier+'!', life:1.2, color:'#eccc68', x:player.x, y:player.y-44 });
                         }
-                        score += 10 * comboMultiplier;
-                        floatingMessages.push({ text:'+'+(10*comboMultiplier), life:0.7, color:'#eccc68', x:c.x, y:c.y-22, small:true });
-                        const req = (currentLevel <= MAX_REGULAR_LEVELS) ? getLevelConfig(currentLevel).required : bossFlagRequired;
-                        if (player.getStrength() > req) {
-                            levelTimer += 3;
-                            floatingMessages.push({ text:'+3s', life:0.8, color:'#2ed573', x:player.x, y:player.y-62, small:true });
+						
+						if (gameState === STATE.BOSS_BATTLE) {
+							bossCitizensCaught++; // Acumulativo: NO baja cuando te saca ciudadanos
+							if (bossWavesFired < BOSS_WAVES_AT.length && bossCitizensCaught >= BOSS_WAVES_AT[bossWavesFired]) {
+								bossWavesFired++;
+								triggerBossWave();
+							}
+						}
+						/*
+                        if (gameState === STATE.BOSS_BATTLE) {
+                            bossCitizensCaught++;
+                            const wavesEarned = Math.floor(bossCitizensCaught / BOSS_WAVE_CITIZENS);
+                            if (wavesEarned > bossWavesFired) {
+                                bossWavesFired = wavesEarned;
+                                triggerBossWave();
+                            }
                         }
+						*/
                         break;
                     }
                 }
@@ -741,7 +950,10 @@
                         if (c.collected||c.scatter>0) continue;
                         if (Math.hypot(p.x-c.x, p.y-c.y) < p.radius+c.radius) { c.scatter=2; }
                     }
-                    if (player.getStrength()>0 && Math.hypot(p.x-player.x, p.y-player.y) < p.radius+player.radius+10) {
+                    const contact = Math.hypot(p.x-player.x, p.y-player.y) < p.radius+player.radius+10;
+                    if (!contact) continue;
+                    
+                    if (player.getStrength()>0) {
                         if (player.shield) { 
                             p.stun(1.5); 
                             cameraShake = 5;
@@ -758,7 +970,58 @@
                             }
                         }
                         else if (player.invuln<=0) { player.loseCitizens(Math.min(3, player.getStrength())); resetCombo(); }
+                    } else {
+                        if (player.invuln<=0) {
+                            lives--;
+                            player.invuln = 2.0;
+                            cameraShake = 18;
+                            sfxBattle();
+                            floatingMessages.push({ text:'¡DETENIDX! −1 ❤', life:1.6, color:'#ff6b81', x:player.x, y:player.y-44 });
+                            if (lives <= 0) setGameOver();
+                        }
                     }
+                }
+            }
+            function bossCapture() {
+                if (!boss || gameState !== STATE.BOSS_BATTLE) return;
+                if (boss.stunTimer > 0) return;
+
+                const contact = Math.hypot(boss.x - player.x, boss.y - player.y) < boss.radius + player.radius + 10;
+                if (!contact) return;
+
+                if (player.shield) {
+                    boss.stunTimer = Math.max(boss.stunTimer, 1.2);
+                    player.shield = false; player.shieldTimer = 0;
+                    cameraShake = 12;
+                    playBeep(300, 0.2, 'square', 0.1);
+                    floatingMessages.push({ text:'¡ESCUDO POPULAR!', life:1.4, color:'#2ed573', x:boss.x, y:boss.y - boss.radius - 20 });
+                    for (let i=0;i<12;i++) {
+                        particles.push({
+                            x: boss.x, y: boss.y,
+                            color: '#2ed573', life: 0.5,
+                            vx: (Math.random()-0.5)*180, vy: (Math.random()-0.5)*180,
+                            radius: 3,
+                            update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                            draw(ctx) { ctx.globalAlpha=this.life*2; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                            alive() { return this.life>0; }
+                        });
+                    }
+                    return;
+                }
+
+                if (player.invuln > 0) return;
+
+                if (player.getStrength() > 0) {
+                    player.loseCitizens(Math.min(3, player.getStrength()));
+                    resetCombo();
+                    floatingMessages.push({ text:'¡TE DESORGANIZÓ!', life:1.2, color:'#ff6b81', x:player.x, y:player.y-40, small:true });
+                } else {
+                    lives--;
+                    player.invuln = 2.0;
+                    cameraShake = 18;
+                    sfxBattle();
+                    floatingMessages.push({ text:'¡DETENIDX! −1 ❤', life:1.6, color:'#ff6b81', x:player.x, y:player.y-44 });
+                    if (lives <= 0) setGameOver();
                 }
             }
             function resetCombo() {
@@ -775,9 +1038,8 @@
                     const hitDist = player.radius + p.radius + 8;
                     if (d > hitDist && d < hitDist + 28 && p.nearMissCd <= 0) {
                         p.nearMissCd = 1.5;
-                        score += 50 * comboMultiplier;
                         playBeep(1400, 0.07, 'sine', 0.06);
-                        floatingMessages.push({ text:'+'+(50*comboMultiplier)+' ¡Cerca!', life:0.9, color:'#7bed9f', x:player.x, y:player.y-34, small:true });
+                        floatingMessages.push({ text:'¡Cerca!', life:0.9, color:'#7bed9f', x:player.x, y:player.y-34, small:true });
                     }
                 }
             }
@@ -806,6 +1068,18 @@
                         for (let p of policeUnits) if (sz.contains(p.x,p.y,p.radius)) p.stun(0.5);
                     }
                 }
+                // El presidente ignora las zonas, pero se molesta
+                if (boss && gameState === STATE.BOSS_BATTLE) {
+                    if (resistanceFocus.contains(player.x, player.y, player.radius) && !resistanceFocus._bossTaunted) {
+                        resistanceFocus._bossTaunted = true;
+                        floatingMessages.push({
+                            text: 'Esa zona no te sirve contra mí  😏',
+                            life: 2.5, color: '#ff6b81',
+                            x: boss.x, y: boss.y - boss.radius - 25, small: true
+                        });
+                        setTimeout(() => { if (resistanceFocus) resistanceFocus._bossTaunted = false; }, 6000);
+                    }
+                }
             }
             function checkFlagSpawn(required) {
                 if (flag || mobilization.active) return;
@@ -825,9 +1099,10 @@
                 if (Math.hypot(player.x-flag.poleX, player.y-(flag.poleY+25)) < 40) {
                     mobilization.active = true;
                     mobilization.timer = 3.0;
+                    mobilization.isFinal = true;
                     flag = null;
                     sfxMobilization();
-                    mobilization.outcomeState = gameState === STATE.BOSS_BATTLE ? STATE.VICTORY : STATE.LEVEL_COMPLETE;
+                    mobilization.outcomeState = STATE.LEVEL_COMPLETE;
                     cameraShake = 20;
                     return true;
                 }
@@ -852,6 +1127,69 @@
                 });
             }
 
+            // =============== ABILIDAD INCLUSIVA ===============
+            function triggerBossWave() {
+                if (bossWave.active) {
+                    bossWave.pending++;
+                    return;
+                }
+                bossWave.active = true;
+                bossWave.timer = 2.4;
+                sfxMobilization();
+                cameraShake = 22;
+                floatingMessages.push({
+                    text: '¡OLA POPULAR!', life: 2.5, color: '#ff4757',
+                    x: W/2, y: H*0.28, id: 'wave_msg'
+                });
+            }
+
+            function useInclusiveAbility() {
+                if (!inclusiveUnlocked) return;
+                if (inclusiveCooldown > 0) return;
+                if (gameState !== STATE.PLAYING && gameState !== STATE.BOSS_BATTLE) return;
+                if (!player) return;
+                
+                inclusiveCooldown = 5.0;
+                inclusiveFlash = 1.0;
+                inclusiveFlashX = player.x;
+                inclusiveFlashY = player.y;
+                cameraShake = 14;
+                sfxInclusive();
+                
+                for (let p of policeUnits) {
+                    p.stun(2.8);
+                    for (let i=0;i<4;i++) {
+                        particles.push({
+                            x: p.x, y: p.y,
+                            color: '#a29bfe', life: 0.6,
+                            vx: (Math.random()-0.5)*120, vy: (Math.random()-0.5)*120,
+                            radius: 3,
+                            update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                            draw(ctx) { ctx.globalAlpha=this.life*1.5; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                            alive() { return this.life>0; }
+                        });
+                    }
+                }
+                
+                floatingMessages.push({
+                    text: '¡Vamos les pibis!',
+                    life: 1.6, color: '#a29bfe',
+                    x: player.x, y: player.y - 50, id: 'inclusive_msg'
+                });
+
+                // El presidente es inmune, pero se incomoda
+                if (boss && gameState === STATE.BOSS_BATTLE) {
+                    const dBoss = Math.hypot(boss.x - player.x, boss.y - player.y);
+                    if (dBoss < 450) {
+                        floatingMessages.push({
+                            text: '¡No me hables en inclusivo!',
+                            life: 1.8, color: '#ff6b81',
+                            x: boss.x, y: boss.y - boss.radius - 25, small: true
+                        });
+                    }
+                }
+            }
+
             // =============== RENDER ===============
             function drawBossTaunt(c2) {
                 c2.font = `bold ${Math.min(15, Math.max(11, W/55))}px "Inter", sans-serif`;
@@ -865,6 +1203,7 @@
                 c2.textBaseline = 'alphabetic';
             }
             function drawWorld() {
+                if (!W || !H) return;
                 ctx.clearRect(0, 0, W, H);
                 
                 ctx.save();
@@ -887,6 +1226,15 @@
                 if (flag) flag.draw(ctx);
                 
                 particles.forEach(p=>p.draw(ctx));
+
+                if (inclusiveFlash > 0) {
+                    const r = (1 - inclusiveFlash) * 650;
+                    ctx.beginPath();
+                    ctx.arc(inclusiveFlashX, inclusiveFlashY, r, 0, Math.PI*2);
+                    ctx.strokeStyle = `rgba(162, 155, 254, ${Math.max(0, inclusiveFlash)})`;
+                    ctx.lineWidth = 8;
+                    ctx.stroke();
+                }
                 
                 ctx.restore();
 
@@ -905,7 +1253,7 @@
                     
                     lines.forEach((line, i) => {
                         const ly = m.y + (i - (lines.length-1)/2)*lineHeight;
-                        ctx.fillStyle = '#000'; // shadow
+                        ctx.fillStyle = '#000';
                         ctx.fillText(line, m.x+2, ly+2);
                         ctx.fillStyle = m.color;
                         ctx.fillText(line, m.x, ly);
@@ -942,16 +1290,155 @@
                     ctx.fillStyle = '#e0e0e0'; 
                     ctx.font = `${Math.min(18, Math.max(12, W/40))}px "Inter", sans-serif`;
                     ctx.shadowBlur = 4;
-                    ctx.fillText(subtitle, W/2, H*0.55);
+                    const lines = subtitle.split('\n');
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, W/2, H*0.55 + i * Math.min(24, W/35));
+                    });
                 }
                 
                 ctx.fillStyle = '#2ed573'; 
                 ctx.font = `bold ${Math.min(16, Math.max(10, W/45))}px "Press Start 2P", cursive`;
                 ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
-                ctx.fillText(actionText, W/2, H*0.75);
+                ctx.fillText(actionText, W/2, H*0.82);
                 ctx.globalAlpha = 1;
                 ctx.shadowBlur = 0;
             }
+
+            function drawInclusiveUnlockOverlay() {
+                ctx.fillStyle = 'rgba(20, 20, 36, 0.94)';
+                ctx.fillRect(0, 0, W, H);
+                
+                let titleSize = Math.min(22, W / 30);
+                ctx.fillStyle = '#a29bfe';
+                ctx.font = `bold ${titleSize}px "Press Start 2P", cursive`;
+                ctx.textAlign = 'center';
+                ctx.shadowColor = '#000'; ctx.shadowBlur = 8;
+                ctx.fillText('¡DESBLOQUEASTE EL', W/2, H*0.26);
+                ctx.fillText('LENGUAJE INCLUSIVO!', W/2, H*0.26 + titleSize + 10);
+                
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#e0e0e0';
+                ctx.font = `${Math.min(18, Math.max(13, W/40))}px "Inter", sans-serif`;
+                ctx.fillText('Apretá la tecla  E  para colapsar', W/2, H*0.52);
+                ctx.fillText('el sistema nervioso de los policías.', W/2, H*0.52 + Math.min(28, W/30));
+                
+                ctx.fillStyle = '#a29bfe';
+                ctx.font = `bold ${Math.min(13, Math.max(9, W/55))}px "Inter", sans-serif`;
+                ctx.fillText('(Paraliza a todos los policías durante unos segundos · Cooldown 5s)', W/2, H*0.68);
+                
+                ctx.fillStyle = '#2ed573';
+                ctx.font = `bold ${Math.min(15, Math.max(10, W/45))}px "Press Start 2P", cursive`;
+                ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
+                ctx.fillText('CLIC PARA CONTINUAR', W/2, H*0.85);
+                ctx.globalAlpha = 1;
+            }
+
+            // =============== MODAL VICTORIA / RANKING ===============
+            function showVictoryModal() {
+                modal.classList.add('active');
+                modal.innerHTML = `
+                    <h2>¡VICTORIA TOTAL!</h2>
+                    <p>El presidente fue derrotado por la unidad popular.</p>
+                    <p>Tiempo total: <strong style="color:#2ed573">${formatTime(totalTime)}</strong></p>
+                    <p>Puntaje: <strong style="color:#eccc68">${score}</strong></p>
+                    <p style="margin-top:14px;">Ingresá tu nombre para el ranking:</p>
+                    <input id="name-input" maxlength="14" placeholder="Tu nombre" autocomplete="off">
+                    <button id="save-score-btn">GUARDAR EN RANKING</button>
+                `;
+                const input = document.getElementById('name-input');
+                const btn = document.getElementById('save-score-btn');
+                setTimeout(() => input && input.focus(), 60);
+                const submit = () => {
+                    const name = (input.value || '').trim() || 'Anónimx';
+                    saveToRanking(name, totalTime, score);
+                    showRankingModal();
+                };
+                btn.onclick = submit;
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); submit(); }
+                });
+            }
+
+            function showRankingModal() {
+                const ranking = getRanking();
+                const rows = ranking.slice(0, 10).map((r, i) => `
+                    <div class="rank-row">
+                        <span class="rank-pos">${i+1}.</span>
+                        <span class="rank-name">${escapeHtml(r.name)}</span>
+                        <span class="rank-time">${formatTime(r.time)}</span>
+                        <span class="rank-score">${r.score}pts</span>
+                    </div>
+                `).join('');
+                modal.classList.add('active');
+                modal.innerHTML = `
+                    <h2>RANKING DE TIEMPOS</h2>
+                    <div class="ranking-list">${rows || '<p>Sin registros aún</p>'}</div>
+                    <button id="close-rank-btn">VOLVER AL MENÚ</button>
+                `;
+                document.getElementById('close-rank-btn').onclick = () => {
+                    modal.classList.remove('active');
+                    gameState = STATE.MENU;
+                    score = 0; lives = 3; currentLevel = 1; totalTime = 0; inclusiveUnlocked = false;
+                };
+            }
+
+            function drawShareHint() {
+                ctx.fillStyle = 'rgba(224,224,224,0.75)';
+                ctx.font = `${Math.min(12, Math.max(9, W/60))}px "Inter", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText("Presioná 'C' para copiar tu puntaje y desafiar a otrx", W/2, H*0.88);
+            }
+            function shareScore() {
+                const text = `Hice ${formatTime(totalTime)} (${score} pts) en "Unidad contra el Presidente Anarcocapitalista" 🚩 ¿Me superás? https://piquelin.github.io/inti-utiles/Agrupemonos_vivecode_v0.7.html`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(()=>{
+                        floatingMessages.push({ text:'¡Puntaje copiado al portapapeles!', life:1.6, color:'#2ed573', x:W/2, y:H*0.78, small:true });
+                    }).catch(()=>{});
+                }
+            }
+            function handleClick() {
+                if (modal.classList.contains('active')) return;
+                initAudio();
+                const bgm = document.getElementById('bgm');
+                if (bgm && bgm.paused) {
+                    bgm.volume = 0.25;
+                    bgm.play().catch(e => console.log('Autoplay audio prevented by browser'));
+                }
+
+                if (gameState === STATE.MENU) gameState = STATE.TUTORIAL;
+                else if (gameState === STATE.TUTORIAL) { initLevel(1); score=0; lives=3; totalTime=0; inclusiveUnlocked=false; }
+                else if (gameState === STATE.LEVEL_COMPLETE) {
+                    if (currentLevel === 4 && !inclusiveUnlocked) {
+                        gameState = STATE.INCLUSIVE_UNLOCK;
+                    } else if (currentLevel < MAX_REGULAR_LEVELS) {
+                        initLevel(currentLevel+1);
+                    } else {
+                        initBossLevel();
+                    }
+                }
+                else if (gameState === STATE.INCLUSIVE_UNLOCK) {
+                    inclusiveUnlocked = true;
+                    initLevel(5);
+                }
+                else if (gameState === STATE.BOSS_INTRO) { gameState = STATE.BOSS_BATTLE; bossIntroTimer = 0; }
+                else if (gameState === STATE.GAME_OVER) { gameState = STATE.MENU; score=0; lives=3; currentLevel=1; totalTime=0; inclusiveUnlocked=false; }
+            }
+
+            canvas.addEventListener('click', handleClick);
+            window.addEventListener('keydown', e => {
+                if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+                initAudio();
+                const k = e.key.toLowerCase();
+                keys[k] = true;
+                if (k==='c' && (gameState===STATE.GAME_OVER||gameState===STATE.VICTORY)) shareScore();
+                if (k==='e') useInclusiveAbility();
+                if (e.key===' '||e.key==='Enter') handleClick();
+            });
+            window.addEventListener('keyup', e => { keys[e.key.toLowerCase()]=false; });
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            gameState = STATE.MENU;
+            requestAnimationFrame(loop);
 
             // =============== BUCLE ===============
             let lastTime = performance.now();
@@ -962,37 +1449,38 @@
                 const cfg = currentLevel <= MAX_REGULAR_LEVELS ? getLevelConfig(currentLevel) : null;
                 
                 if (cameraShake > 0) cameraShake = Math.max(0, cameraShake - dt*30);
+                if (inclusiveFlash > 0) inclusiveFlash = Math.max(0, inclusiveFlash - dt*1.6);
 
                 if (gameState === STATE.MENU) {
                     drawWorld();
-                    drawOverlay('UNIDAD CONTRA EL PRESIDENTE', `Organizá a los sectores populares y resistí. Récord: ${highScore}`, 'HAZ CLIC PARA EMPEZAR');
+                    drawOverlay('UNIDAD CONTRA EL PRESIDENTE', `Organizá a los sectores populares y resistí.\nRécord: ${highScore}`, 'HAZ CLIC PARA EMPEZAR');
                 }
                 else if (gameState === STATE.TUTORIAL) {
                     drawWorld();
                     ctx.fillStyle = `rgba(20, 20, 36, 0.9)`; ctx.fillRect(0,0,W,H);
                     let titleSize = Math.min(26, W / 26);
                     ctx.fillStyle='#f1c40f'; ctx.font=`bold ${titleSize}px "Press Start 2P", cursive`; ctx.textAlign='center';
-                    ctx.fillText('INSTRUCCIONES', W/2, H*0.15);
+                    ctx.fillText('INSTRUCCIONES', W/2, H*0.11);
                     
                     ctx.fillStyle='#e0e0e0'; ctx.font=`${Math.min(16, Math.max(12, W/50))}px "Inter", sans-serif`;
                     const lines = [
                         '🚔 POLICÍAS: Te persiguen. Quitan ciudadanos.',
-                        '',
                         '🛡️ ZONA SEGURA: Círculos verdes. Estás a salvo aquí.',
-                        '',
                         '👥 CIUDADANOS: Tocalos para organizarlos.',
-                        '',
                         '🚩 BANDERA: Aparece al juntar los necesarios.',
                         'Al tocarla, una marea popular barre la represión.',
                         '',
+                        '⏱️ NO HAY LÍMITE DE TIEMPO.',
+                        'Pero terminá RÁPIDO: tu tiempo vale puntos.',
+                        '',
                         'Controles: W A S D / Flechas'
                     ];
-                    lines.forEach((line,i)=> ctx.fillText(line, W/2, H*0.28 + i*Math.min(30, W/30)));
+                    lines.forEach((line,i)=> ctx.fillText(line, W/2, H*0.24 + i*Math.min(30, W/34)));
                     
                     ctx.fillStyle = '#2ed573'; 
                     ctx.font = `bold ${Math.min(16, Math.max(10, W/45))}px "Press Start 2P", cursive`;
                     ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
-                    ctx.fillText('HAZ CLIC PARA JUGAR', W/2, H*0.88);
+                    ctx.fillText('HAZ CLIC PARA JUGAR', W/2, H*0.92);
                     ctx.globalAlpha = 1;
                 }
                 else if (gameState === STATE.PLAYING || gameState === STATE.BOSS_BATTLE) {
@@ -1002,7 +1490,42 @@
                     if (resistanceFocus) resistanceFocus.update(dt);
                     safeZones.forEach(s=>s.update(dt));
                     if (flag) flag.update(dt);
-                    levelTimer -= dt;
+
+                    totalTime += dt;
+                    if (inclusiveCooldown > 0) inclusiveCooldown = Math.max(0, inclusiveCooldown - dt);
+
+                    if (bossWave.active && gameState === STATE.BOSS_BATTLE && boss) {
+                        bossWave.timer -= dt;
+                        for (let i=0;i<10;i++) spawnTideParticle();
+                        for (let p of policeUnits) if (p.stunTimer < 1.2) p.stun(2.0);
+                        if (bossWave.timer <= 0) {
+                            boss.hit(25);
+                            if (boss.hp <= 0) {
+                                sfxVictory();
+                                setVictory();
+                            }
+                            if (bossWave.pending > 0) {
+                                bossWave.pending--;
+                                bossWave.timer = 2.4;
+                            } else {
+                                bossWave.active = false;
+                            }
+                        }
+                    }
+
+                    if (gameState === STATE.BOSS_BATTLE) {
+                        bossSpawnTimer -= dt;
+                        const freeCount = citizens.filter(c => !c.collected && c.scatter <= 0).length;
+                        if (bossSpawnTimer <= 0 && freeCount < 12) {
+                            const allTypes = ['jubilado','discapacitado','cientifico','feminista','universitario'];
+                            citizens.push(new Citizen(
+                                30 + Math.random()*(W-60),
+                                30 + Math.random()*(H-60),
+                                allTypes[Math.floor(Math.random()*allTypes.length)]
+                            ));
+                            bossSpawnTimer = 2.0 + Math.random()*1.5;
+                        }
+                    }
 
                     if (mobilization.active) {
                         mobilization.timer -= dt;
@@ -1015,29 +1538,21 @@
                                 }
                             }
                         }
-                        if (gameState === STATE.BOSS_BATTLE && boss) {
-                            for (let pt of particles) {
-                                if (pt.isTide && Math.hypot(pt.x-boss.x, pt.y-boss.y) < pt.radius+boss.radius) {
-                                    boss.hit(0.5);
-                                    pt.life = 0;
-                                }
-                            }
-                            if (boss.hp > 0) boss.hp -= dt * 40;
-                        }
 
                         if (mobilization.timer <= 0) {
                             policeUnits.forEach(p=>p.stun(999));
                             mobilization.active = false;
-                            
-                            gameState = mobilization.outcomeState;
-                            if (gameState === STATE.LEVEL_COMPLETE) { score+=300*currentLevel; sfxVictory(); }
-                            else if (gameState === STATE.VICTORY) { score+=1000; sfxVictory(); }
+                            if (mobilization.isFinal) {
+                                gameState = mobilization.outcomeState;
+                                if (gameState === STATE.LEVEL_COMPLETE) sfxVictory();
+                            }
                         }
                     }
 
-                    if (!mobilization.active) {
+                    if (!mobilization.active && gameState !== STATE.GAME_OVER && gameState !== STATE.VICTORY) {
                         playerCollect();
                         policeCapture();
+                        bossCapture();
                         safeZoneProtect();
                         checkNearMiss();
                         if (gameState === STATE.PLAYING && cfg) {
@@ -1050,7 +1565,6 @@
                                 while (next === bossTauntText) next = BOSS_TAUNTS[Math.floor(Math.random()*BOSS_TAUNTS.length)];
                                 bossTauntText = next; bossTauntTimer = 7;
                             }
-                            checkFlagSpawn(bossFlagRequired); 
                         }
                         checkFlagCollection();
                     }
@@ -1059,99 +1573,73 @@
                     floatingMessages.forEach(m=>{ if (m.life < 1000) m.life -= dt; if (m.small) m.y -= 24*dt; });
                     floatingMessages = floatingMessages.filter(m=>m.life>0);
 
-                    if (levelTimer <= 0 && !mobilization.active) {
-                        if ((cfg && player.getStrength() >= cfg.required) || (gameState===STATE.BOSS_BATTLE && flag)) {
-                            if (gameState===STATE.PLAYING) { gameState=STATE.LEVEL_COMPLETE; score+=200*currentLevel; sfxVictory(); }
-                        } else {
-                            lives--;
-                            if (lives<=0) gameState=STATE.GAME_OVER;
-                            else initLevel(currentLevel);
-                        }
-                    }
                     updateHUD(cfg);
                     drawWorld();
                 }
                 else if (gameState === STATE.BOSS_INTRO) {
                     drawWorld();
-                    drawOverlay('¡EL PRESIDENTE APARECE!', 'Todos los sectores unidos en la lucha final.', 'PREPÁRATE');
+
+                    ctx.fillStyle = 'rgba(20, 20, 36, 0.92)';
+                    ctx.fillRect(0, 0, W, H);
+
+                    let titleSize = Math.min(22, W / 30);
+                    ctx.fillStyle = '#ff4757';
+                    ctx.font = `bold ${titleSize}px "Press Start 2P", cursive`;
+                    ctx.textAlign = 'center';
+                    ctx.shadowColor = '#000'; ctx.shadowBlur = 8;
+                    ctx.fillText('¡EL PRESIDENTE APARECE!', W/2, H*0.13);
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = '#e0e0e0';
+                    ctx.font = `${Math.min(15, Math.max(11, W/48))}px "Inter", sans-serif`;
+                    const introLines = [
+                        'Con la plata que le prestó Trump,',
+                        'el presidente se compró el Congreso',
+                        'y le otorgó superpoderes.',
+                        '',
+                        '¡No lo afectan el lenguaje inclusivo',
+                        'ni los focos de lucha!',
+                        '',
+                        'Pero sí lo MOLESTAN   ;)'
+                    ];
+                    introLines.forEach((line, i) => {
+                        ctx.fillText(line, W/2, H*0.26 + i*Math.min(26, W/32));
+                    });
+
+                    ctx.fillStyle = '#2ed573';
+                    ctx.font = `bold ${Math.min(15, Math.max(10, W/45))}px "Press Start 2P", cursive`;
+                    ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
+                    ctx.fillText('PREPÁRATE', W/2, H*0.9);
+                    ctx.globalAlpha = 1;
+
                     bossIntroTimer += dt;
-                    if (bossIntroTimer>3 || keys[' ']||keys['enter']) {
+                    if (bossIntroTimer > 5 || keys[' '] || keys['enter']) {
                         gameState = STATE.BOSS_BATTLE;
                         bossIntroTimer = 0;
                     }
                 }
+                else if (gameState === STATE.INCLUSIVE_UNLOCK) {
+                    drawWorld();
+                    drawInclusiveUnlockOverlay();
+                }
                 else if (gameState === STATE.LEVEL_COMPLETE) {
                     drawWorld();
                     let msg = LEVEL_TITLES[currentLevel].replace('Organicemos a los ','').replace('Unamos a los ','').replace('Unamos a las ','').replace('Despertemos a los ','').toUpperCase();
-                    drawOverlay(`¡${msg} ORGANIZADOS!`, `Completaste el Nivel ${currentLevel}`, 'SIGUIENTE NIVEL');
+                    drawOverlay(`¡${msg} ORGANIZADOS!`, `Completaste el Nivel ${currentLevel}\nTiempo: ${formatTime(totalTime)}`, 'SIGUIENTE NIVEL');
                 }
                 else if (gameState === STATE.GAME_OVER) {
                     drawWorld();
-                    const rec = saveHighScore();
-                    drawOverlay('LA ORGANIZACIÓN FRACASÓ', `La represión fue demasiado fuerte. Puntaje: ${score}` + (rec ? ' ¡Nuevo récord!' : ` · Récord: ${highScore}`), 'VOLVER A INTENTAR');
+                    const rec = score >= highScore && score > 0;
+                    drawOverlay('LA ORGANIZACIÓN FRACASÓ', `La represión fue demasiado fuerte.\nTiempo: ${formatTime(totalTime)} · Puntaje: ${score}` + (rec ? '\n¡Nuevo récord!' : `\nRécord: ${highScore}`), 'VOLVER A INTENTAR');
                     drawShareHint();
                 }
                 else if (gameState === STATE.VICTORY) {
                     drawWorld();
-                    const rec = saveHighScore();
-                    drawOverlay('¡VICTORIA TOTAL!', `El presidente fue derrotado gracias a la unidad. Puntaje: ${score}` + (rec ? ' ¡Nuevo récord!' : ` · Récord: ${highScore}`), 'JUGAR DE NUEVO');
-                    drawShareHint();
+                    // El modal HTML maneja el resto
                 }
 
                 requestAnimationFrame(loop);
             }
-
-            function saveHighScore() {
-                if (score > highScore) {
-                    highScore = score;
-                    localStorage.setItem('agrupe_highscore', String(highScore));
-                    return true;
-                }
-                return false;
-            }
-            function drawShareHint() {
-                ctx.fillStyle = 'rgba(224,224,224,0.75)';
-                ctx.font = `${Math.min(12, Math.max(9, W/60))}px "Inter", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.fillText("Presioná 'C' para copiar tu puntaje y desafiar a otrx", W/2, H*0.83);
-            }
-            function shareScore() {
-                const text = `Me puse ${score} pts en "Unidad contra el Presidente Anarcocapitalista" 🚩 ¿Me superás? https://piquelin.github.io/inti-utiles/Agrupemonos_vivecode_v0.7.html`;
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text).then(()=>{
-                        floatingMessages.push({ text:'¡Puntaje copiado al portapapeles!', life:1.6, color:'#2ed573', x:W/2, y:H*0.78, small:true });
-                    }).catch(()=>{});
-                }
-            }
-            function handleClick() {
-                initAudio();
-                const bgm = document.getElementById('bgm');
-                if (bgm && bgm.paused) {
-                    bgm.volume = 0.25;
-                    bgm.play().catch(e => console.log('Autoplay audio prevented by browser'));
-                }
-
-                if (gameState === STATE.MENU) gameState = STATE.TUTORIAL;
-                else if (gameState === STATE.TUTORIAL) { initLevel(1); score=0; lives=3; }
-                else if (gameState === STATE.LEVEL_COMPLETE) {
-                    if (currentLevel < MAX_REGULAR_LEVELS) initLevel(currentLevel+1);
-                    else initBossLevel();
-                }
-                else if (gameState === STATE.BOSS_INTRO) { gameState = STATE.BOSS_BATTLE; bossIntroTimer = 0; }
-                else if (gameState === STATE.GAME_OVER || gameState === STATE.VICTORY) { gameState = STATE.MENU; score=0; lives=3; currentLevel=1; }
-            }
-
-            canvas.addEventListener('click', handleClick);
-            window.addEventListener('keydown', e => {
-                initAudio();
-                keys[e.key.toLowerCase()] = true;
-                if (e.key.toLowerCase()==='c' && (gameState===STATE.GAME_OVER||gameState===STATE.VICTORY)) shareScore();
-                if (e.key===' '||e.key==='Enter') handleClick();
-            });
-            window.addEventListener('keyup', e => { keys[e.key.toLowerCase()]=false; });
-            resizeCanvas();
-            gameState = STATE.MENU;
-            requestAnimationFrame(loop);
         })();
     </script>
 </body>
