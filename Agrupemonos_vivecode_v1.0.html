@@ -1,0 +1,2697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unidad Contra el Presidente Anarco Capitalista — v1.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #1a1a24; 
+            --text: #e0e0e0; 
+            --good-red: #ff3838;
+            --good-red-glow: #ff6b6b;
+            --police-blue: #1e90ff;
+            --safe: #2ed573; 
+            --gold: #eccc68;
+            --purple: #a29bfe;
+            --cyan: #70a1ff;
+            --panel-bg: rgba(20, 20, 32, 0.9);
+            --border: #474759;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 100% 150%, var(--bg) 24%, var(--bg) 24%, var(--bg) 28%, var(--bg) 28%, var(--bg) 36%, var(--bg) 36%, var(--bg) 40%, transparent 40%, transparent),
+                radial-gradient(circle at 0    150%, var(--bg) 24%, var(--bg) 24%, var(--bg) 28%, var(--bg) 28%, var(--bg) 36%, var(--bg) 36%, var(--bg) 40%, transparent 40%, transparent),
+                radial-gradient(circle at 50%  100%, #2a2a35 10%, var(--bg) 11%, var(--bg) 23%, #2a2a35 24%, #2a2a35 24%, var(--bg) 25%, var(--bg) 35%, #2a2a35 36%, #2a2a35 36%, var(--bg) 37%, var(--bg) 47%, #2a2a35 48%, #2a2a35 48%, var(--bg) 49%, var(--bg) 59%, #2a2a35 60%, #2a2a35 60%, var(--bg) 61%, var(--bg) 71%, #2a2a35 72%, #2a2a35 72%, var(--bg) 73%, var(--bg) 83%, #2a2a35 84%, #2a2a35 84%, var(--bg) 85%, var(--bg) 95%, #2a2a35 96%, #2a2a35 96%, var(--bg) 97%, var(--bg) 100%);
+            background-size: 50px 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            color: var(--text);
+        }
+        #game-container {
+            position: relative;
+            width: 96vw;
+            max-width: 1220px;
+            aspect-ratio: 16/10.5;
+            max-height: 95vh;
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #111;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 24px rgba(255, 56, 56, 0.22);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============ HUD REDISEÑADO EN 3 SECCIONES (ROJO = PUEBLO / AZUL = FRÍO) ============ */
+        #hud {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 7px 12px;
+            background: linear-gradient(180deg, rgba(28,28,44,0.98), rgba(14,14,24,0.98));
+            border-bottom: 2px solid var(--border);
+            z-index: 10;
+        }
+        .hud-section {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .hud-panel {
+            background: var(--panel-bg); 
+            border: 1.5px solid var(--border);
+            border-radius: 7px; 
+            padding: 5px 10px; 
+            color: var(--text);
+            font-size: 11px; 
+            font-weight: 700;
+            pointer-events: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .hud-panel span.val { color: var(--good-red); font-family: 'Press Start 2P', cursive; font-size: 9px; }
+        .hud-panel.timer-panel span.val { color: var(--gold); font-size: 10px; }
+        .hud-panel.combo-active { border-color: var(--good-red); box-shadow: 0 0 8px rgba(255, 56, 56, 0.4); }
+        .hud-panel.combo-active span.val { color: var(--good-red-glow); }
+        #hud-lives { font-size: 13px; letter-spacing: 2px; color: var(--good-red); }
+
+        /* Bloque Central: Misión y Progreso Unificado (Escala Azul -> Rojo) */
+        .hud-mission {
+            flex: 1 1 280px;
+            max-width: 460px;
+            justify-content: center;
+            background: rgba(25, 25, 40, 0.95);
+            border: 1.5px solid #575770;
+            border-radius: 8px;
+            padding: 4px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .mission-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+        #hud-level-title { color: #fff; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #hud-org-counter { font-family: 'Press Start 2P', cursive; font-size: 9px; color: var(--good-red-glow); }
+        .progress-track {
+            width: 100%;
+            height: 9px;
+            background: #1b2234;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #2f3a56;
+        }
+        /* Escala del Azul al Rojo (el Rojo es la organización popular) */
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #1e90ff 0%, #8e44ad 45%, #ff3838 100%);
+            transition: width 0.2s ease-out;
+        }
+        .progress-fill.ready {
+            background: linear-gradient(90deg, #ff3838, #ff6b6b, #eccc68);
+            box-shadow: 0 0 10px #ff3838;
+        }
+
+        /* Bloque Derecho: Conquistas / Poderes (Rojo cuando están activos, Azul/Gris en espera) */
+        .power-badge {
+            background: rgba(25, 25, 38, 0.85);
+            border: 1.5px solid #3d3d52;
+            border-radius: 7px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            opacity: 0.32;
+            filter: grayscale(1);
+            transition: all 0.2s;
+            pointer-events: auto;
+        }
+        .power-badge.unlocked {
+            opacity: 1;
+            filter: none;
+            border-color: var(--good-red);
+            background: rgba(255, 56, 56, 0.14);
+        }
+        .power-badge.active-skill {
+            cursor: pointer;
+        }
+        .power-badge.active-skill.unlocked:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 10px rgba(255, 56, 56, 0.4);
+        }
+        .power-badge.on-cooldown {
+            border-color: var(--police-blue) !important;
+            background: rgba(30, 144, 255, 0.15) !important;
+        }
+        .power-badge .key-hint {
+            background: #2f3542;
+            color: var(--gold);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #57606f;
+        }
+        .power-badge .cd-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            color: var(--good-red-glow);
+        }
+        .power-badge.on-cooldown .cd-text {
+            color: var(--cyan);
+        }
+
+        /* ============ CANVAS ============ */
+        #canvas-wrapper {
+            flex: 1 1 auto;
+            position: relative;
+            min-height: 0;
+            background: #111;
+            overflow: hidden;
+        }
+        canvas { 
+            position: absolute;
+            inset: 0;
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+            image-rendering: pixelated;
+            touch-action: none;
+        }
+
+        /* ============ CONTROLES FLOTANTES INFERIORES (MUTE + DEV MENU) ============ */
+        #bottom-controls {
+            position: absolute;
+            bottom: 10px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+            z-index: 30;
+        }
+        .ctrl-btn {
+            cursor: pointer;
+            padding: 6px 10px;
+            font-size: 13px;
+            user-select: none;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+        .ctrl-btn:hover {
+            border-color: var(--good-red);
+            transform: scale(1.05);
+        }
+
+        /* ============ PANEL DE CONFIGURACIÓN / DESARROLLO ============ */
+        #dev-panel {
+            display: none;
+            position: absolute;
+            bottom: 52px;
+            right: 12px;
+            width: 340px;
+            max-width: 92vw;
+            background: rgba(16, 16, 28, 0.96);
+            border: 2px solid var(--good-red);
+            border-radius: 10px;
+            padding: 12px 14px;
+            z-index: 100;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+            font-size: 12px;
+            color: var(--text);
+            backdrop-filter: blur(8px);
+        }
+        #dev-panel.open { display: block; }
+        #dev-panel h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: var(--good-red-glow);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+        .dev-row {
+            margin-bottom: 9px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .dev-row label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #bbb;
+        }
+        .dev-row select {
+            background: #252538;
+            color: #fff;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 5px 8px;
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            cursor: pointer;
+        }
+        .dev-row select:focus { border-color: var(--good-red); }
+        .dev-shortcuts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 6px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+        .dev-btn {
+            background: #2c2c44;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 4px 7px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .dev-btn:hover {
+            background: var(--good-red);
+            color: #fff;
+            border-color: var(--good-red);
+        }
+
+        /* ============ MODALES (VICTORIA / RANKING / VIDEOS) ============ */
+        .modal-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 10, 20, 0.95);
+            z-index: 200;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            backdrop-filter: blur(6px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-overlay h2 {
+            color: var(--good-red);
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(13px, 2vw, 20px);
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(255,56,56,0.5);
+            line-height: 1.4;
+        }
+        .modal-overlay p { margin: 4px 0; font-size: clamp(12px, 1.5vw, 15px); }
+        .modal-overlay input {
+            padding: 10px 14px;
+            font-size: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: rgba(30,30,45,0.9);
+            color: var(--text);
+            outline: none;
+            margin: 12px 0;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            min-width: 220px;
+        }
+        .modal-overlay input:focus { border-color: var(--good-red); }
+        .modal-overlay button {
+            padding: 11px 20px;
+            font-size: 11px;
+            font-family: 'Press Start 2P', cursive;
+            border: 2px solid var(--good-red);
+            background: rgba(255,56,56,0.18);
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.15s;
+        }
+        .modal-overlay button:hover {
+            background: var(--good-red);
+            color: #fff;
+        }
+        .video-box {
+            width: 100%;
+            max-width: 580px;
+            max-height: 54vh;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            margin: 10px 0;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+        }
+        .video-box video {
+            width: 100%;
+            max-height: 52vh;
+            display: block;
+        }
+        .ranking-list {
+            width: 100%;
+            max-width: 520px;
+            max-height: 45vh;
+            overflow-y: auto;
+            margin: 10px 0;
+            padding: 4px;
+        }
+        .rank-row {
+            display: grid;
+            grid-template-columns: 34px 1fr auto auto;
+            gap: 10px;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 14px;
+            align-items: center;
+        }
+        .rank-row:first-child { color: #eccc68; font-weight: 700; }
+        .rank-pos { color: var(--good-red); font-weight: 700; }
+        .rank-name { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rank-time { color: var(--safe); font-family: 'Press Start 2P', cursive; font-size: 10px; }
+        .rank-score { color: #eccc68; font-size: 12px; min-width: 70px; text-align: right; }
+    </style>
+</head>
+<body>
+    <audio id="bgm" loop>
+        <source src="internacional.mp3" type="audio/mpeg">
+    </audio>
+    <div id="game-container">
+        <!-- BARRA SUPERIOR HUD EN 3 BLOQUES -->
+        <div id="hud">
+            <!-- 1. Estado Vital y Tiempo -->
+            <div class="hud-section">
+                <div class="hud-panel" title="Vidas restantes"><span id="hud-lives">❤❤❤</span></div>
+                <div class="hud-panel timer-panel" title="Tiempo total"><span class="emoji-icon">⏱️</span> <span class="val" id="hud-timer">0:00</span></div>
+                <div class="hud-panel" id="hud-combo-panel" title="Multiplicador de racha (aumenta tu velocidad y puntaje)"><span class="emoji-icon">⚡</span> <span class="val" id="hud-combo">×1</span></div>
+            </div>
+
+            <!-- 2. Misión y Progreso Unificado (Escala Azul a Rojo) -->
+            <div class="hud-mission">
+                <div class="mission-top">
+                    <span id="hud-level-title">Nv.1 · Personas con Discapacidad</span>
+                    <span id="hud-org-counter">👥 0 / 6</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="hud-progress"></div>
+                </div>
+            </div>
+
+            <!-- 3. Conquistas / Herramientas Desbloqueadas -->
+            <div class="hud-section" id="hud-powers">
+                <div class="power-badge" id="power-pace" title="Paso Colectivo (Nv.1): Nadie se queda atrás, la columna marcha unida sin perder integrantes por distancia">
+                    <span>🤝</span> <span>Unidad</span> <span class="cd-text" id="status-pace">🔒</span>
+                </div>
+                <div class="power-badge" id="power-health" title="Posta de Salud (Nv.2): Brigadista recorre el campo curando a los afectados por gases">
+                    <span>🏥</span> <span>Posta Salud</span> <span class="cd-text" id="status-health">🔒</span>
+                </div>
+                <div class="power-badge" id="power-mask" title="Máscaras Antigás (INTI/CONICET): Reduce el efecto de enlentecimiento de los gases lacrimógenos">
+                    <span>🥽</span> <span>Antigás</span> <span class="cd-text" id="status-mask">🔒</span>
+                </div>
+                <div class="power-badge active-skill" id="power-inclusive" title="Lenguaje Inclusivo (Tecla E): Paraliza a todos los policías">
+                    <span>🗣️</span> <span class="key-hint">E</span> <span class="cd-text" id="status-inclusive">🔒</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="canvas-wrapper">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Botones inferiores: Config de Prueba y Sonido -->
+        <div id="bottom-controls">
+            <div id="dev-btn" class="hud-panel ctrl-btn" title="Menú de Desarrollo y Pruebas">⚙️ Pruebas</div>
+            <div id="mute-btn" class="hud-panel ctrl-btn" title="Alternar Sonido"><span class="emoji-icon">🔊</span></div>
+        </div>
+
+        <!-- Menú Selector de Desarrollo -->
+        <div id="dev-panel">
+            <h3>
+                <span>⚙️ MODO DESARROLLO v1.0</span>
+                <span id="dev-close" style="cursor:pointer; color:#ff6b81;">✕</span>
+            </h3>
+            <div class="dev-row">
+                <label for="cfg-heal-mode">🏥 Comportamiento Posta de Salud:</label>
+                <select id="cfg-heal-mode">
+                    <option value="brigadista_npc">Brigadista Móvil (Va hacia los afectados y la columna)</option>
+                    <option value="ambos">Brigadista Móvil + Curar en Círculo Verde</option>
+                    <option value="posta">Solo curar dentro del Círculo Verde</option>
+                </select>
+            </div>
+            <div class="dev-row">
+                <label for="cfg-edge-mode">📐 Comportamiento en Bordes / Esquinas:</label>
+                <select id="cfg-edge-mode">
+                    <option value="rebote_simple" selected>Rebote de ángulo simple (Por defecto)</option>
+                    <option value="rebote_repulsion">Anti-esquinas (Rebote + Repulsión suave)</option>
+                    <option value="clasico">Clásico v0.9 (Sin rebote / original)</option>
+                </select>
+            </div>
+            <div class="dev-row">
+                <label for="cfg-videos">🎬 Videos documentales entre niveles:</label>
+                <select id="cfg-videos">
+                    <option value="off">Desactivados (Rápido / Liviano)</option>
+                    <option value="on">Activados (Reproducir MP4 al completar nivel)</option>
+                </select>
+            </div>
+            <div class="dev-row">
+                <label for="cfg-gas-rate">💨 Gases Lacrimógenos Policiales:</label>
+                <select id="cfg-gas-rate">
+                    <option value="normal">Normal (Desde Nivel 2)</option>
+                    <option value="intenso">Intenso (También en Nv.1 y más frecuente)</option>
+                    <option value="off">Desactivados</option>
+                </select>
+            </div>
+            <div class="dev-shortcuts">
+                <span style="width:100%; font-size:10px; color:#aaa; margin-bottom:2px;">Saltar a nivel / Acciones rápidas:</span>
+                <button class="dev-btn" data-goto="1">Nv.1 Discap.</button>
+                <button class="dev-btn" data-goto="2">Nv.2 Jubilados</button>
+                <button class="dev-btn" data-goto="3">Nv.3 INTI</button>
+                <button class="dev-btn" data-goto="4">Nv.4 8M</button>
+                <button class="dev-btn" data-goto="5">Nv.5 Univ.</button>
+                <button class="dev-btn" data-goto="6">👑 Boss</button>
+                <button class="dev-btn" id="dev-unlock-all" style="border-color:#ff3838; color:#ff6b6b;">🔓 Todo Desbloq.</button>
+                <button class="dev-btn" id="dev-spawn-gas" style="border-color:#eccc68; color:#eccc68;">💨 Tirar Gas</button>
+            </div>
+        </div>
+
+        <div id="modal" class="modal-overlay"></div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== REFERENCIAS DOM ====================
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const wrapper = document.getElementById('canvas-wrapper');
+
+            const hudLevelTitle = document.getElementById('hud-level-title');
+            const hudOrgCounter = document.getElementById('hud-org-counter');
+            const hudTimer = document.getElementById('hud-timer');
+            const hudLives = document.getElementById('hud-lives');
+            const hudCombo = document.getElementById('hud-combo');
+            const hudComboPanel = document.getElementById('hud-combo-panel');
+            const hudProgress = document.getElementById('hud-progress');
+            const modal = document.getElementById('modal');
+
+            const powerPaceBadge = document.getElementById('power-pace');
+            const powerHealthBadge = document.getElementById('power-health');
+            const powerMaskBadge = document.getElementById('power-mask');
+            const powerInclusiveBadge = document.getElementById('power-inclusive');
+
+            const statusPace = document.getElementById('status-pace');
+            const statusHealth = document.getElementById('status-health');
+            const statusMask = document.getElementById('status-mask');
+            const statusInclusive = document.getElementById('status-inclusive');
+
+            // ==================== CONFIGURACIÓN DE DESARROLLO ====================
+            const devConfig = {
+                healMode: 'brigadista_npc',   // 'brigadista_npc' | 'ambos' | 'posta'
+                edgeMode: 'rebote_simple',    // 'rebote_simple' | 'rebote_repulsion' | 'clasico'
+                videosEnabled: false,         // true | false
+                gasRate: 'normal'             // 'normal' | 'intenso' | 'off'
+            };
+
+            const devBtn = document.getElementById('dev-btn');
+            const devPanel = document.getElementById('dev-panel');
+            const devClose = document.getElementById('dev-close');
+            const cfgHealMode = document.getElementById('cfg-heal-mode');
+            const cfgEdgeMode = document.getElementById('cfg-edge-mode');
+            const cfgVideos = document.getElementById('cfg-videos');
+            const cfgGasRate = document.getElementById('cfg-gas-rate');
+
+            devBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                devPanel.classList.toggle('open');
+            });
+            devClose.addEventListener('click', (e) => {
+                e.stopPropagation();
+                devPanel.classList.remove('open');
+            });
+            devPanel.addEventListener('click', (e) => e.stopPropagation());
+
+            cfgHealMode.addEventListener('change', (e) => {
+                devConfig.healMode = e.target.value;
+                if (healthUnlocked && !brigadista && devConfig.healMode !== 'posta' && resistanceFocus) {
+                    brigadista = new HealthBrigadista(resistanceFocus.x, resistanceFocus.y);
+                }
+            });
+            cfgEdgeMode.addEventListener('change', (e) => { devConfig.edgeMode = e.target.value; });
+            cfgVideos.addEventListener('change', (e) => { devConfig.videosEnabled = (e.target.value === 'on'); });
+            cfgGasRate.addEventListener('change', (e) => { devConfig.gasRate = e.target.value; });
+
+            const muteBtn = document.getElementById('mute-btn');
+            muteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const bgm = document.getElementById('bgm');
+                if (bgm) {
+                    bgm.muted = !bgm.muted;
+                    muteBtn.innerHTML = bgm.muted ? '<span class="emoji-icon">🔇</span>' : '<span class="emoji-icon">🔊</span>';
+                }
+            });
+
+            // ==================== ASSETS ====================
+            const assets = {
+                boss: new Image()
+            };
+            assets.boss.src = 'presidente.png';
+
+            const LEVEL_VIDEOS = {
+                1: { src: 'desconocen al congreso.mp4', caption: 'Emergencia en Discapacidad en el Congreso' },
+                2: { src: 'echan_y_reprimen.mp4', caption: 'Los jubilados y la Posta de Salud resisten cada miércoles' },
+                3: { src: 'universidadyciencia.mp4', caption: 'Defensa de la Ciencia y la Tecnología Pública' },
+                4: { src: 'niunamenos.mp4', caption: 'El movimiento feminista y de diversidades en las calles' },
+                5: { src: 'videoplayback.mp4', caption: 'Estudiantes y trabajadores unidos rumbo a la huelga general' }
+            };
+
+            // ==================== CONFIGURACIÓN DEL JUEGO ====================
+            const MAX_REGULAR_LEVELS = 5;
+            const BOSS_LEVEL_NUM = MAX_REGULAR_LEVELS + 1;
+            const BOSS_WAVES_AT = [10, 20, 30, 40];
+
+            const LEVEL_TITLES = {
+                1: "Organicemos a las Personas con Discapacidad",
+                2: "Organicemos a los Jubilados",
+                3: "Unamos a los Científicos (INTI/CONICET)",
+                4: "Unamos a Feminismos y Diversidades",
+                5: "Despertemos a los Estudiantes",
+            };
+            LEVEL_TITLES[BOSS_LEVEL_NUM] = "¡Agrupémonos Todos!";
+
+            const RESISTANCE_FOCUS = {
+                1: { name: "Congreso", message: "El Congreso vota la ley de emergencia en discapacidad.\n¡Caminá al ritmo del grupo para no perder a nadie!" },
+                2: { name: "Marcha de los Miércoles", message: "Cada miércoles los jubilados reclaman una jubilación digna\nmientras la Posta de Salud asiste a los reprimidos." },
+                3: { name: "INTI / CONICET", message: "Trabajadores de ciencia y tecnología defienden\nlos organismos públicos contra el desguace." },
+                4: { name: "Asamblea 8M", message: "Mujeres y diversidades se movilizan\nmasivamente contra los femicidios y el ajuste." },
+                5: { name: "Universidad Pública", message: "Estudiantes y docentes defienden la educación\npública y la Ley de Financiamiento." },
+                [BOSS_LEVEL_NUM]: { name: "TODOS A LA PLAZA", message: "¡La comunidad se moviliza masivamente\ncon todas sus conquistas activas!" }
+            };
+
+            const FLAG_MESSAGES = {
+                1: "¡Personas con discapacidad organizadas\nvoltean el Veto del gobierno!",
+                2: "¡Los Jubilados organizados se suman\njunto a la Posta de Salud!",
+                3: "¡Los trabajadores voltean el decreto\nque centraliza al INTI y al INTA!",
+                4: "¡La marea verde vuelve\na ser protagonista y marca el camino!",
+                5: "¡La justicia ratifica que el gobierno\ntiene que cumplir la Ley\nde Financiamiento Universitario!",
+                [BOSS_LEVEL_NUM]: "¡LA GRAN HUELGA GENERAL\nHA COMENZADO!"
+            };
+
+            // Pantallas narrativas de aprendizaje / desbloqueo al superar cada nivel
+            const UNLOCK_INFO = {
+                1: {
+                    color: '#ff4757',
+                    icon: '🤝',
+                    title1: '¡NADIE SE QUEDA',
+                    title2: 'ATRÁS!',
+                    lines: [
+                        'En el primer nivel ibas más rápido que tus compañeros',
+                        'y si corrías sin esperarlos se soltaban de la fila.',
+                        '',
+                        'Aprendiste que la lucha es CON TODOS Y TODAS:',
+                        'a partir de ahora ajustás tu velocidad al ritmo colectivo',
+                        'para que la columna marche firme y nadie quede atrás.'
+                    ],
+                    sub: '(Paso Colectivo desbloqueado: la columna ya no se rompe por distancia)'
+                },
+                2: {
+                    color: '#2ed573',
+                    icon: '🏥',
+                    title1: '¡DESBLOQUEASTE LA',
+                    title2: 'POSTA DE SALUD!',
+                    lines: [
+                        'Un Brigadista de Salud (🧑🏽‍⚕️➕) ahora recorre el campo:',
+                        'busca a los ciudadanos gaseados (😢) para curarlos',
+                        'y también atiende a tu columna cuando se acerca.',
+                        '',
+                        'Quienes reciben atención quedan protegidos unos segundos',
+                        'para poder salir de la nube de gas sin recaer.'
+                    ],
+                    sub: '(Brigadista autónomo en cancha: cura afectados y protege temporalmente)'
+                },
+                3: {
+                    color: '#70a1ff',
+                    icon: '🥽',
+                    title1: '¡CIENCIA PÚBLICA:',
+                    title2: 'MÁSCARAS ANTIGÁS!',
+                    lines: [
+                        'Los científicos del INTI y CONICET desarrollaron',
+                        'máscaras protectoras para resistir la represión.',
+                        '',
+                        'El gas lacrimógeno todavía molesta,',
+                        'pero ahora te enlentece MUCHO MENOS',
+                        'y tus compañeros se recuperan más rápido.'
+                    ],
+                    sub: '(Reducción drástica del enlentecimiento por gases lacrimógenos)'
+                },
+                4: {
+                    color: '#a29bfe',
+                    icon: '🗣️',
+                    title1: '¡DESBLOQUEASTE EL',
+                    title2: 'LENGUAJE INCLUSIVO!',
+                    lines: [
+                        'Apretá la tecla  E  para gritar "¡Vamos les pibis!"',
+                        'y colapsar el sistema nervioso de la policía.',
+                        '',
+                        'Todos los efectivos quedan paralizados de confusión.'
+                    ],
+                    sub: '(Paraliza a todos los policías durante 2.8s · Cooldown 5s)'
+                }
+            };
+
+            const BOSS_TAUNTS = [
+                "¡AFUERA!",
+                "No hay plata.",
+                "El Estado es un crimen.",
+                "Viva la libertad, carajo."
+            ];
+            let bossTauntTimer = 3;
+            let bossTauntText = '';
+
+            function getLevelConfig(lvl) {
+                const c = {
+                    1: { citizens:14, police:2, policeSpeed:1.15, citizenSpeed:0.78, required:6, type:'discapacitado' },
+                    2: { citizens:20, police:3, policeSpeed:1.55, citizenSpeed:1.2, required:8, type:'jubilado' },
+                    3: { citizens:25, police:4, policeSpeed:1.9, citizenSpeed:1.45, required:10, type:'cientifico' },
+                    4: { citizens:25, police:4, policeSpeed:2.05, citizenSpeed:1.5, required:10, type:'feminista' },
+                    5: { citizens:28, police:5, policeSpeed:2.2, citizenSpeed:1.55, required:12, type:'universitario' },
+                };
+                return c[lvl] || c[5];
+            }
+
+            // ==================== AUDIO ====================
+            let audioCtx = null;
+            function initAudio() {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            }
+            function playBeep(f, d, t='square', v=0.08) {
+                if (!audioCtx) return;
+                try {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+                    g.gain.setValueAtTime(v, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.start(); o.stop(audioCtx.currentTime + d);
+                } catch(e) {}
+            }
+            function sfxCollect() { playBeep(600,0.1,'sine',0.07); playBeep(900,0.08,'sine',0.05); }
+            function sfxHeal() { playBeep(520,0.08,'sine',0.07); setTimeout(()=>playBeep(780,0.12,'sine',0.07),70); }
+            function sfxGas() { playBeep(140,0.25,'sawtooth',0.06); }
+            function sfxCall() { playBeep(440,0.1,'triangle',0.09); setTimeout(()=>playBeep(660,0.16,'triangle',0.09),90); }
+            function sfxDrop() { playBeep(240,0.18,'sawtooth',0.08); }
+            function sfxBattle() { playBeep(80,0.3,'square',0.1); }
+            function sfxVictory() { playBeep(523,0.15); setTimeout(()=>playBeep(659,0.15),150); setTimeout(()=>playBeep(784,0.25),300); }
+            function sfxFlagSpawn() { playBeep(800,0.1,'sine',0.08); playBeep(1000,0.15,'sine',0.09); }
+            function sfxMobilization() { playBeep(200,0.5,'square',0.12); playBeep(300,0.6,'triangle',0.1); }
+            function sfxInclusive() {
+                playBeep(330,0.12,'sine',0.09);
+                setTimeout(()=>playBeep(494,0.12,'sine',0.09),90);
+                setTimeout(()=>playBeep(659,0.22,'sine',0.1),180);
+            }
+
+            // ==================== ESTADOS Y VARIABLES ====================
+            const STATE = {
+                MENU:'menu', TUTORIAL:'tutorial', PLAYING:'playing',
+                BOSS_INTRO:'boss_intro', BOSS_BATTLE:'boss_battle',
+                ABILITY_UNLOCK:'ability_unlock',
+                LEVEL_COMPLETE:'level_complete', GAME_OVER:'game_over', VICTORY:'victory'
+            };
+            let gameState = STATE.MENU;
+            let currentLevel = 1;
+            let pendingUnlockLevel = 0;
+            let score = 0;
+            let lives = 3;
+            let comboStreak = 0;
+            let comboMultiplier = 1;
+            let maxComboReached = 1;
+            let highScore = parseInt(localStorage.getItem('agrupe_highscore') || '0', 10) || 0;
+            let totalTime = 0;
+
+            // Conquistas progresivas por nivel:
+            let paceUnlocked = false;      // Fin Nv.1: Paso Colectivo ("Nadie se queda atrás")
+            let healthUnlocked = false;    // Fin Nv.2: Posta de Salud (Brigadista Móvil)
+            let maskUnlocked = false;      // Fin Nv.3: Máscaras Antigás INTI/CONICET (reduce enlentecimiento)
+            let inclusiveUnlocked = false; // Fin Nv.4: Lenguaje Inclusivo (Tecla E)
+
+            let inclusiveCooldown = 0;
+            let inclusiveFlash = 0;
+            let inclusiveFlashX = 0, inclusiveFlashY = 0;
+
+            let bossCitizensCaught = 0;
+            let bossWavesFired = 0;
+            let bossWave = { active:false, timer:0, pending:0 };
+            let bossSpawnTimer = 0;
+
+            let player;
+            let brigadista = null; // NPC aliado de la Posta de Salud
+            let citizens = [], policeUnits = [], safeZones = [], particles = [], gasClouds = [];
+            let resistanceFocus = null; 
+            let boss = null;
+            let flag = null;
+            let mobilization = { active: false, timer: 0, outcomeState: null, isFinal: false };
+            let floatingMessages = [];
+            let bossIntroTimer = 0;
+            const keys = {};
+            let mobileDir = { x:0, y:0 };
+            let cameraShake = 0;
+
+            let W, H;
+            function resizeCanvas() {
+                const rect = wrapper.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) return;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                const newW = Math.floor(rect.width * dpr);
+                const newH = Math.floor(rect.height * dpr);
+                if (canvas.width !== newW || canvas.height !== newH) {
+                    canvas.width = newW;
+                    canvas.height = newH;
+                }
+                W = newW; H = newH;
+            }
+
+            // ==================== UTILS Y RANKING ====================
+            function formatTime(t) {
+                const m = Math.floor(t / 60);
+                const s = Math.floor(t % 60);
+                return m + ':' + ('0'+s).slice(-2);
+            }
+            function escapeHtml(str) {
+                return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+            }
+            function getRanking() {
+                try {
+                    const r = JSON.parse(localStorage.getItem('agrupe_ranking') || '[]');
+                    return Array.isArray(r) ? r : [];
+                } catch(e) { return []; }
+            }
+            function saveToRanking(name, time, sc) {
+                const ranking = getRanking();
+                ranking.push({ name: String(name).slice(0,14), time: Number(time.toFixed(2)), score: Number(sc), date: Date.now() });
+                ranking.sort((a,b) => b.score - a.score);
+                const trimmed = ranking.slice(0, 20);
+                localStorage.setItem('agrupe_ranking', JSON.stringify(trimmed));
+                return trimmed;
+            }
+            function computeFinalScore(isVictory) {
+                const base = isVictory ? 1000000 : 100000;
+                const effectiveTime = Math.max(1, totalTime * (1 - (maxComboReached - 1) * 0.05));
+                const timeScore = Math.round(base / effectiveTime);
+                const livesBonus = lives * (isVictory ? 1200 : 150);
+                const comboBonus = maxComboReached * (isVictory ? 500 : 100);
+                return timeScore + livesBonus + comboBonus;
+            }
+            function saveHighScore() {
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('agrupe_highscore', String(highScore));
+                    return true;
+                }
+                return false;
+            }
+            function setGameOver() {
+                if (gameState === STATE.GAME_OVER) return;
+                score = computeFinalScore(false);
+                saveHighScore();
+                gameState = STATE.GAME_OVER;
+            }
+            function setVictory() {
+                if (gameState === STATE.VICTORY) return;
+                score = computeFinalScore(true);
+                saveHighScore();
+                gameState = STATE.VICTORY;
+                showVictoryModal();
+            }
+
+            // ==================== CLASES ====================
+            class TearGasCloud {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.radius = 65;
+                    this.life = 7.5;
+                    this.maxLife = 7.5;
+                    this.seed = Math.random() * 100;
+                }
+                update(dt) {
+                    this.life -= dt;
+                }
+                draw(ctx) {
+                    if (this.life <= 0) return;
+                    const alpha = Math.min(1, this.life / 1.5) * 0.42;
+                    const pulse = Math.sin(Date.now() * 0.004 + this.seed) * 6;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius + pulse, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(195, 220, 70, ${alpha})`;
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(220, 240, 100, ${alpha * 1.4})`;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([6, 6]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    for (let i = 0; i < 3; i++) {
+                        const ang = this.seed + i * 2.1 + Date.now() * 0.0015;
+                        const ox = Math.cos(ang) * (this.radius * 0.38);
+                        const oy = Math.sin(ang) * (this.radius * 0.38);
+                        ctx.beginPath();
+                        ctx.arc(this.x + ox, this.y + oy, this.radius * 0.45, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(180, 210, 60, ${alpha * 0.75})`;
+                        ctx.fill();
+                    }
+
+                    ctx.font = '22px "Segoe UI Emoji", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.globalAlpha = Math.min(1, this.life);
+                    ctx.fillText('💨', this.x, this.y);
+                    ctx.restore();
+                }
+            }
+
+            // NPC Aliado: Brigadista de la Posta de Salud que busca y cura a los afectados
+            class HealthBrigadista {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.radius = 20;
+                    this.speed = 3.1;
+                    this.emoji = '🧑🏽‍⚕️';
+                    this.healCooldown = 0;
+                    this.patrolAngle = Math.random() * Math.PI * 2;
+                }
+                update(dt) {
+                    if (devConfig.healMode === 'posta') return; // En modo "Solo Posta", no sale a buscar
+                    if (this.healCooldown > 0) this.healCooldown -= dt;
+
+                    // Buscar el objetivo gaseado más prioritario:
+                    // 1) Alguien en la columna del jugador que esté gaseado
+                    // 2) Ciudadanos sueltos en el mapa que estén gaseados (😢)
+                    let target = null;
+                    let minDist = Infinity;
+
+                    if (player) {
+                        const hasGassedInCol = player.collected.some(c => c.gassed > 0) || player.inGas;
+                        if (hasGassedInCol) {
+                            target = player;
+                            minDist = Math.hypot(player.x - this.x, player.y - this.y) * 0.75; // Prioridad a la columna
+                        }
+                    }
+
+                    for (let c of citizens) {
+                        if (c.collected || c.gassed <= 0) continue;
+                        const d = Math.hypot(c.x - this.x, c.y - this.y);
+                        if (d < minDist) {
+                            minDist = d;
+                            target = c;
+                        }
+                    }
+
+                    if (target) {
+                        // Moverse decididamente hacia el afectado o la columna
+                        const ang = Math.atan2(target.y - this.y, target.x - this.x);
+                        this.x += Math.cos(ang) * this.speed * dt * 60;
+                        this.y += Math.sin(ang) * this.speed * dt * 60;
+                    } else if (player) {
+                        // Si no hay nadie gaseado, orbitar suavemente cerca de la Posta / jugador como escolta sanitario
+                        const homeX = resistanceFocus ? (resistanceFocus.x * 0.5 + player.x * 0.5) : player.x;
+                        const homeY = resistanceFocus ? (resistanceFocus.y * 0.5 + player.y * 0.5) : player.y;
+                        const dHome = Math.hypot(homeX - this.x, homeY - this.y);
+                        if (dHome > 90) {
+                            const ang = Math.atan2(homeY - this.y, homeX - this.x);
+                            this.x += Math.cos(ang) * (this.speed * 0.65) * dt * 60;
+                            this.y += Math.sin(ang) * (this.speed * 0.65) * dt * 60;
+                        } else {
+                            this.patrolAngle += dt * 1.2;
+                            this.x += Math.cos(this.patrolAngle) * 0.8 * dt * 60;
+                            this.y += Math.sin(this.patrolAngle) * 0.8 * dt * 60;
+                        }
+                    }
+
+                    this.x = Math.max(this.radius, Math.min(W - this.radius, this.x));
+                    this.y = Math.max(this.radius, Math.min(H - this.radius, this.y));
+
+                    // Curar a ciudadanos sueltos cuando los toca (con inmunidad temporal para no quedar en loop dentro de la nube)
+                    for (let c of citizens) {
+                        if (c.collected || c.gassed <= 0) continue;
+                        if (Math.hypot(c.x - this.x, c.y - this.y) < this.radius + c.radius + 10) {
+                            c.gassed = 0;
+                            c.gasImmunity = 4.0;
+                            // Impulsar al ciudadano hacia afuera si está pisando una nube de gas
+                            for (let g of gasClouds) {
+                                if (Math.hypot(c.x - g.x, c.y - g.y) < g.radius + c.radius) {
+                                    c.wanderAngle = Math.atan2(c.y - g.y, c.x - g.x);
+                                    c.wanderTimer = 2.0;
+                                    break;
+                                }
+                            }
+                            sfxHeal();
+                            spawnHealParticles(c.x, c.y);
+                            floatingMessages.push({
+                                text: '➕ ¡Atendidx!',
+                                life: 1.1, color: '#2ed573',
+                                x: c.x, y: c.y - 30, small: true
+                            });
+                        }
+                    }
+
+                    // Curar a la gente de la columna cuando toca al jugador o a cualquier integrante de la columna
+                    if (player && this.healCooldown <= 0) {
+                        let touchedColumn = Math.hypot(player.x - this.x, player.y - this.y) < this.radius + player.radius + 14;
+                        if (!touchedColumn) {
+                            for (let c of player.collected) {
+                                if (Math.hypot(c.x - this.x, c.y - this.y) < this.radius + c.radius + 12) {
+                                    touchedColumn = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (touchedColumn) {
+                            let cured = 0;
+                            if (player.inGas && player.gasImmunity <= 0) {
+                                player.gasImmunity = 3.5;
+                                cured++;
+                            }
+                            for (let c of player.collected) {
+                                if (c.gassed > 0) {
+                                    c.gassed = 0;
+                                    c.gasImmunity = 4.0;
+                                    spawnHealParticles(c.x, c.y);
+                                    cured++;
+                                }
+                            }
+                            if (cured > 0) {
+                                this.healCooldown = 1.5;
+                                sfxHeal();
+                                floatingMessages.push({
+                                    text: `🏥 ¡Brigadista curó a la columna!`,
+                                    life: 1.3, color: '#2ed573',
+                                    x: player.x, y: player.y - 42, small: true
+                                });
+                            }
+                        }
+                    }
+                }
+                draw(ctx) {
+                    if (devConfig.healMode === 'posta') return;
+                    ctx.save();
+                    // Halo sanitario verde/blanco
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius + 4, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(46, 213, 115, 0.6)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#e8f8f5';
+                    ctx.fill();
+                    ctx.strokeStyle = '#2ed573';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+
+                    ctx.font = '24px "Segoe UI Emoji", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.emoji, this.x, this.y + 2);
+
+                    ctx.font = '13px "Segoe UI Emoji", sans-serif';
+                    ctx.fillText('➕', this.x + this.radius - 3, this.y - this.radius + 3);
+                    ctx.restore();
+                }
+            }
+
+            class Player {
+                constructor(x, y) {
+                    this.x = x; this.y = y; this.radius = 22;
+                    // En Nivel 1 (sin paceUnlocked), el protagonista corre más rápido (4.5) pero debe cuidar de no dejar atrás a la fila.
+                    // Desde Nivel 2 (con paceUnlocked), ajusta su velocidad al paso colectivo (3.45).
+                    this.speed = (!paceUnlocked && currentLevel === 1) ? 4.55 : 3.45;
+                    this.collected = []; this.trail = [];
+                    this.invuln = 0; this.speedBoost = 0; this.shield = false; this.shieldTimer = 0;
+                    this.facing = 1;
+                    this.inGas = false;
+                    this.gasImmunity = 0;
+                    this.strainWarningCooldown = 0;
+                }
+                update(dt) {
+                    this.speed = (!paceUnlocked && currentLevel === 1) ? 4.55 : 3.45;
+                    if (this.strainWarningCooldown > 0) this.strainWarningCooldown -= dt;
+                    if (this.gasImmunity > 0) this.gasImmunity = Math.max(0, this.gasImmunity - dt);
+
+                    let dx = 0, dy = 0;
+                    if (keys['w']||keys['arrowup']) dy=-1;
+                    if (keys['s']||keys['arrowdown']) dy=1;
+                    if (keys['a']||keys['arrowleft']) { dx=-1; this.facing = -1; }
+                    if (keys['d']||keys['arrowright']) { dx=1; this.facing = 1; }
+                    dx += mobileDir.x; dy += mobileDir.y;
+                    const mag = Math.sqrt(dx*dx+dy*dy);
+                    if (mag > 1) { dx /= mag; dy /= mag; }
+
+                    // Chequear si el jugador o su columna pisan gas lacrimógeno
+                    this.inGas = false;
+                    if (this.gasImmunity <= 0) {
+                        for (let g of gasClouds) {
+                            if (Math.hypot(this.x - g.x, this.y - g.y) < g.radius + this.radius * 0.5) {
+                                this.inGas = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Los integrantes de la columna que pasan sobre gas también se ven afectados (salvo inmunidad post-curación)
+                    for (let c of this.collected) {
+                        if (c.gasImmunity > 0) {
+                            c.gasImmunity = Math.max(0, c.gasImmunity - dt);
+                        } else {
+                            for (let g of gasClouds) {
+                                if (Math.hypot(c.x - g.x, c.y - g.y) < g.radius + c.radius * 0.4) {
+                                    c.gassed = Math.max(c.gassed, maskUnlocked ? 2.5 : 5.5);
+                                }
+                            }
+                        }
+                        if (c.gassed > 0) {
+                            // Recuperación natural lenta (más rápida si tienen máscaras del Nv.3)
+                            c.gassed = Math.max(0, c.gassed - dt * (maskUnlocked ? 0.55 : 0.18));
+                        }
+                    }
+
+                    // Penalización por gas:
+                    // Con Máscaras Antigás (Nv.3), el gas enlentece mucho menos (solo 18% en vez de 45%)
+                    const gasPlayerFactor = this.inGas ? (maskUnlocked ? 0.82 : 0.55) : 1.0;
+                    const gassedInCol = this.collected.filter(c => c.gassed > 0).length;
+                    const perCitizenGasPenalty = maskUnlocked ? 0.025 : 0.06;
+                    const colGasFactor = Math.max(maskUnlocked ? 0.78 : 0.52, 1 - gassedInCol * perCitizenGasPenalty);
+
+                    const comboSpeedBonus = (comboMultiplier - 1) * 0.18;
+                    let spd = (this.speed + this.speedBoost + comboSpeedBonus) * gasPlayerFactor * colGasFactor;
+
+                    this.x += dx * spd * dt * 60;
+                    this.y += dy * spd * dt * 60;
+                    this.x = Math.max(this.radius, Math.min(W-this.radius, this.x));
+                    this.y = Math.max(this.radius, Math.min(H-this.radius, this.y));
+                    this.trail.push({x:this.x, y:this.y});
+                    if (this.trail.length > 35) this.trail.shift();
+                    if (this.invuln > 0) this.invuln -= dt;
+                    if (this.speedBoost > 0) this.speedBoost = Math.max(0, this.speedBoost - dt*0.8);
+                    if (this.shieldTimer > 0) { this.shieldTimer -= dt; if (this.shieldTimer<=0) this.shield=false; }
+
+                    // Movimiento de los seguidores en la columna:
+                    if (!paceUnlocked && currentLevel === 1) {
+                        // MECÁNICA NIVEL 1 (Personas con Discapacidad):
+                        // Los seguidores avanzan más lento que la velocidad máxima del protagonista.
+                        // Si te alejás demasiado rápido sin esperarlos, se estira la fila y perdés al último.
+                        for (let i = 0; i < this.collected.length; i++) {
+                            const c = this.collected[i];
+                            const leader = (i === 0) ? this : this.collected[i - 1];
+                            const targetDist = 30;
+                            const d = Math.hypot(leader.x - c.x, leader.y - c.y);
+                            if (d > targetDist) {
+                                const ang = Math.atan2(leader.y - c.y, leader.x - c.x);
+                                // Velocidad máxima del seguidor (3.05 vs 4.55 del jugador)
+                                const maxFollowSpd = 3.05 * (c.gassed > 0 ? 0.6 : 1.0);
+                                const step = Math.min(d - targetDist, maxFollowSpd * dt * 60);
+                                c.x += Math.cos(ang) * step;
+                                c.y += Math.sin(ang) * step;
+                            }
+                            c.linkDist = d;
+                        }
+
+                        // Verificar si el último o algún eslabón quedó demasiado lejos
+                        for (let i = this.collected.length - 1; i >= 0; i--) {
+                            const c = this.collected[i];
+                            if (c.linkDist > 110 && this.strainWarningCooldown <= 0) {
+                                this.strainWarningCooldown = 1.4;
+                                floatingMessages.push({
+                                    text: '⚠️ ¡Vas muy rápido, esperá al grupo!',
+                                    life: 1.2, color: '#eccc68',
+                                    x: c.x, y: c.y - 32, small: true
+                                });
+                            }
+                            if (c.linkDist > 165) {
+                                // Se suelta desde este eslabón hasta el final de la cola
+                                const dropped = this.collected.splice(i);
+                                for (let dc of dropped) {
+                                    dc.free = true;
+                                    dc.collected = false;
+                                    dc.pickupLock = 1.0;
+                                    dc.wanderAngle = Math.random() * Math.PI * 2;
+                                    citizens.push(dc);
+                                }
+                                sfxDrop();
+                                resetCombo();
+                                floatingMessages.push({
+                                    text: '¡Alguien quedó atrás! Caminá más despacio',
+                                    life: 1.8, color: '#ff6b81',
+                                    x: this.x, y: this.y - 45, small: true
+                                });
+                                break;
+                            }
+                        }
+                    } else {
+                        // A partir del Nivel 2 (Paso Colectivo): nadie se queda atrás
+                        for (let i=0; i<this.collected.length; i++) {
+                            const c = this.collected[i];
+                            const idx = Math.min(i+3, this.trail.length-1);
+                            const t = this.trail[this.trail.length-1-idx] || {x:this.x, y:this.y};
+                            const angle = i*1.2 + Date.now()*0.002;
+                            const dist = 22 + (i%5)*8;
+                            c.x += (t.x + Math.cos(angle)*dist - c.x) * 0.15;
+                            c.y += (t.y + Math.sin(angle)*dist - c.y) * 0.15;
+                            c.linkDist = 0;
+                        }
+                    }
+                }
+                draw(ctx) {
+                    // En Nivel 1, dibujar líneas de unión entre eslabones para que se vea cuando se tensa la fila
+                    if (!paceUnlocked && currentLevel === 1 && this.collected.length > 0) {
+                        for (let i = 0; i < this.collected.length; i++) {
+                            const c = this.collected[i];
+                            const leader = (i === 0) ? this : this.collected[i - 1];
+                            const d = Math.hypot(leader.x - c.x, leader.y - c.y);
+                            ctx.beginPath();
+                            ctx.moveTo(leader.x, leader.y);
+                            ctx.lineTo(c.x, c.y);
+                            if (d > 105) {
+                                ctx.strokeStyle = '#ff4757';
+                                ctx.lineWidth = 3;
+                                ctx.setLineDash([4, 4]);
+                            } else if (d > 75) {
+                                ctx.strokeStyle = '#eccc68';
+                                ctx.lineWidth = 2;
+                                ctx.setLineDash([]);
+                            } else {
+                                ctx.strokeStyle = 'rgba(255, 56, 56, 0.45)';
+                                ctx.lineWidth = 2;
+                                ctx.setLineDash([]);
+                            }
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        }
+                    }
+
+                    if (this.shield) {
+                        ctx.beginPath(); ctx.arc(this.x,this.y,this.radius+8,0,Math.PI*2);
+                        ctx.fillStyle='rgba(46, 213, 115, 0.3)'; ctx.fill();
+                    }
+                    if (this.invuln>0 && Math.floor(this.invuln*20)%2===0) ctx.globalAlpha=0.5;
+                    
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.scale(this.facing, 1);
+                    
+                    ctx.fillStyle = '#ff3838'; 
+                    ctx.beginPath(); ctx.roundRect(-this.radius, -this.radius, this.radius*2, this.radius*2, 8); ctx.fill();
+                    ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
+                    
+                    ctx.fillStyle = '#ffeaa7';
+                    ctx.beginPath(); ctx.roundRect(-this.radius+6, -this.radius+4, this.radius*2-8, this.radius, 4); ctx.fill();
+
+                    if (maskUnlocked) {
+                        ctx.fillStyle = '#70a1ff';
+                        ctx.strokeStyle = '#1e272e';
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.roundRect(-this.radius+8, -this.radius+6, this.radius*2-12, 9, 3);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    
+                    ctx.fillStyle = '#f1f2f6';
+                    ctx.beginPath();
+                    ctx.moveTo(this.radius, 0);
+                    ctx.lineTo(this.radius + 12, -8);
+                    ctx.lineTo(this.radius + 12, 8);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 1; ctx.stroke();
+
+                    ctx.restore();
+                    ctx.globalAlpha = 1;
+
+                    if (this.inGas) {
+                        ctx.font = '18px "Segoe UI Emoji", sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(maskUnlocked ? '🥽' : '😢', this.x, this.y - this.radius - 10);
+                    }
+
+                    if (this.collected.length>=6) {
+                        ctx.beginPath(); ctx.arc(this.x,this.y,this.radius+10,0,Math.PI*2);
+                        ctx.strokeStyle='#ff3838'; ctx.lineWidth=2; ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+                    }
+                }
+                getStrength() { return this.collected.length; }
+                addCitizen(c) {
+                    if (this.collected.length < 50) {
+                        c.free = false; c.collected = true;
+                        // En Nivel 1 lo ubicamos detrás del último eslabón para que no salte de golpe
+                        if (!paceUnlocked && currentLevel === 1 && this.collected.length > 0) {
+                            const last = this.collected[this.collected.length - 1];
+                            const d = Math.hypot(c.x - last.x, c.y - last.y);
+                            if (d > 65) {
+                                const ang = Math.atan2(c.y - last.y, c.x - last.x);
+                                c.x = last.x + Math.cos(ang) * 45;
+                                c.y = last.y + Math.sin(ang) * 45;
+                            }
+                        }
+                        this.collected.push(c); sfxCollect();
+                        if (this.collected.length === 8 && paceUnlocked) this.speedBoost = 2.0;
+                        if (this.collected.length === 15) { this.shield = true; this.shieldTimer = 8; }
+                        
+                        for(let i=0; i<5; i++) {
+                            particles.push({
+                                x: c.x, y: c.y,
+                                color: '#ff3838', life: 0.5,
+                                vx: (Math.random()-0.5)*100, vy: (Math.random()-0.5)*100,
+                                radius: 3,
+                                update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                                draw(ctx) { ctx.globalAlpha = this.life*2; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                                alive() { return this.life>0; }
+                            });
+                        }
+                    }
+                }
+                loseCitizens(n) {
+                    const lost = [];
+                    for (let i=0; i<n && this.collected.length>0; i++) {
+                        const c = this.collected.pop();
+                        c.free = true; c.collected = false;
+                        c.x = Math.max(c.radius, Math.min(W-c.radius, this.x + (Math.random()-0.5)*80));
+                        c.y = Math.max(c.radius, Math.min(H-c.radius, this.y + (Math.random()-0.5)*80));
+                        c.pickupLock = 1.1;
+                        c.scatter = (devConfig.edgeMode === 'clasico') ? 1.5 : 0.4;
+                        c.wanderAngle = Math.random() * Math.PI * 2;
+                        lost.push(c);
+                        citizens.push(c);
+                    }
+                    this.invuln = 1.0;
+                    cameraShake = 10; 
+                    return lost;
+                }
+            }
+
+            class Citizen {
+                constructor(x, y, type) {
+                    this.x = x; this.y = y; this.radius = 22;
+                    this.free = true; this.collected = false;
+                    this.wanderAngle = Math.random()*Math.PI*2;
+                    this.wanderTimer = Math.random()*3;
+                    this.speed = 0.6;
+                    this.scatter = 0;
+                    this.pickupLock = 0;
+                    this.gassed = 0;
+                    this.gasImmunity = 0;
+                    this.linkDist = 0;
+                    this.type = type;
+                    this.emoji = this.getEmoji();
+                    this.cryEmoji = Math.random() < 0.5 ? '😢' : '😭';
+                }
+                getEmoji() {
+                    if (this.type === 'discapacitado') return ['👨‍🦽','👩🏻‍🦽','👩‍🦯','🧑🏼‍🦯'][Math.floor(Math.random()*4)];
+                    if (this.type === 'jubilado') return ['👴🏽','👵🏽','🧓🏼','👩🏽‍🦳'][Math.floor(Math.random()*4)];
+                    if (this.type === 'cientifico') return ['👩🏻‍⚕️','👩‍🔬','🔬','👨🏽‍🔬'][Math.floor(Math.random()*4)];
+                    if (this.type === 'feminista') return ['👩🏽','👩🏻','👩🏿','🦱','🪂','👬','👭'][Math.floor(Math.random()*7)];
+                    if (this.type === 'universitario') return ['👩🏽‍🎓','👩🏻‍🏫','👩‍🔬','🧑🏻‍💼','👩🏻‍💼'][Math.floor(Math.random()*5)];
+                    return '👤';
+                }
+                update(dt, config) {
+                    if (this.collected) return;
+                    if (this.pickupLock > 0) this.pickupLock = Math.max(0, this.pickupLock - dt);
+                    if (this.gasImmunity > 0) this.gasImmunity = Math.max(0, this.gasImmunity - dt);
+
+                    // Verificar si pisa una nube de gas lacrimógeno (solo si no tiene inmunidad post-curación)
+                    if (this.gasImmunity <= 0) {
+                        for (let g of gasClouds) {
+                            if (Math.hypot(this.x - g.x, this.y - g.y) < g.radius + this.radius * 0.6) {
+                                this.gassed = Math.max(this.gassed, maskUnlocked ? 3.5 : 6.5);
+                            }
+                        }
+                    }
+
+                    if (this.gassed > 0) {
+                        this.gassed = Math.max(0, this.gassed - dt * (maskUnlocked ? 0.5 : 0.2));
+                        if (resistanceFocus && resistanceFocus.active && resistanceFocus.contains(this.x, this.y, this.radius)) {
+                            this.gassed = 0;
+                            this.gasImmunity = 4.0;
+                            spawnHealParticles(this.x, this.y);
+                        }
+                    }
+
+                    if (this.scatter > 0) {
+                        this.scatter -= dt;
+                        if (devConfig.edgeMode === 'clasico') {
+                            this.x += (Math.random()-0.5)*4;
+                            this.y += (Math.random()-0.5)*4;
+                            return;
+                        }
+                    }
+
+                    // Si está gaseado se enlentece (con Máscaras Antigás del Nv.3 se enlentece menos: 62% vs 28%)
+                    const gasSlow = this.gassed > 0 ? (maskUnlocked ? 0.62 : 0.28) : 1.0;
+                    this.speed = config.citizenSpeed * gasSlow;
+                    this.wanderTimer -= dt;
+                    if (this.wanderTimer <= 0) {
+                        this.wanderAngle += (Math.random()-0.5)*1.5;
+                        this.wanderTimer = 1.5 + Math.random()*2.5;
+                    }
+
+                    if (devConfig.edgeMode === 'rebote_repulsion') {
+                        const margin = 52;
+                        let steerX = Math.cos(this.wanderAngle);
+                        let steerY = Math.sin(this.wanderAngle);
+                        if (this.x < margin) steerX += (margin - this.x) / margin * 1.4;
+                        if (this.x > W - margin) steerX -= (this.x - (W - margin)) / margin * 1.4;
+                        if (this.y < margin) steerY += (margin - this.y) / margin * 1.4;
+                        if (this.y > H - margin) steerY -= (this.y - (H - margin)) / margin * 1.4;
+                        this.wanderAngle = Math.atan2(steerY, steerX);
+                    }
+
+                    this.x += Math.cos(this.wanderAngle)*this.speed*dt*60;
+                    this.y += Math.sin(this.wanderAngle)*this.speed*dt*60;
+
+                    if (devConfig.edgeMode !== 'clasico') {
+                        if (this.x <= this.radius) { this.x = this.radius; this.wanderAngle = Math.PI - this.wanderAngle; }
+                        else if (this.x >= W - this.radius) { this.x = W - this.radius; this.wanderAngle = Math.PI - this.wanderAngle; }
+                        if (this.y <= this.radius) { this.y = this.radius; this.wanderAngle = -this.wanderAngle; }
+                        else if (this.y >= H - this.radius) { this.y = H - this.radius; this.wanderAngle = -this.wanderAngle; }
+                    } else {
+                        this.x = Math.max(this.radius, Math.min(W-this.radius, this.x));
+                        this.y = Math.max(this.radius, Math.min(H-this.radius, this.y));
+                    }
+                }
+                draw(ctx) {
+                    if (this.collected) return;
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+                    if (this.gassed > 0) {
+                        ctx.fillStyle = '#d2dae2';
+                        ctx.fill();
+                        ctx.strokeStyle = '#badc58'; ctx.lineWidth = 3; ctx.stroke();
+                    } else if (this.gasImmunity > 0) {
+                        ctx.fillStyle = '#e8f8f5';
+                        ctx.fill();
+                        ctx.strokeStyle = '#2ed573'; ctx.lineWidth = 2.5; ctx.stroke();
+                    } else {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fill();
+                        ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
+                    }
+
+                    ctx.fillStyle = '#000';
+                    ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.gassed > 0 ? this.cryEmoji : this.emoji, this.x, this.y+2);
+
+                    if (this.gassed > 0) {
+                        ctx.font = '14px "Segoe UI Emoji", sans-serif';
+                        ctx.fillText('💨', this.x + this.radius - 4, this.y - this.radius + 4);
+                    }
+                }
+                drawCollected(ctx, x, y) {
+                    ctx.save(); ctx.translate(x, y);
+                    ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI*2);
+                    ctx.fillStyle = this.gassed > 0 ? '#a4b0be' : '#ff3838';
+                    ctx.fill();
+                    ctx.strokeStyle = this.gassed > 0 ? '#badc58' : '#ff6b6b';
+                    ctx.lineWidth = 2; ctx.stroke();
+                    ctx.fillStyle = '#000';
+                    ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(this.gassed > 0 ? this.cryEmoji : this.emoji, 0, 2);
+                    ctx.restore();
+                }
+            }
+
+            class PoliceUnit {
+                constructor(x, y, speed) {
+                    this.x = x; this.y = y; this.radius = 22;
+                    this.speed = speed; this.state = 'patrol'; this.stunTimer = 0;
+                    this.patrolAngle = Math.random()*Math.PI*2; this.patrolTimer = 0;
+                    this.facing = -1;
+                    this.nearMissCd = 0;
+                    this.gasCooldown = 3.5 + Math.random() * 6.0;
+                    this.emoji = Math.random() < 0.5 ? '🧑🏻‍✈️' : '👩🏻‍✈️';
+                }
+                update(dt, playerRef, config) {
+                    if (this.stunTimer>0) { this.stunTimer-=dt; return; }
+                    if (this.nearMissCd>0) this.nearMissCd-=dt;
+                    this.speed = config.policeSpeed;
+
+                    const gasAllowed = devConfig.gasRate === 'intenso' || (devConfig.gasRate === 'normal' && currentLevel >= 2);
+                    if (gasAllowed) {
+                        this.gasCooldown -= dt * (devConfig.gasRate === 'intenso' ? 1.7 : 1.0);
+                        const maxClouds = devConfig.gasRate === 'intenso' ? 5 : 3;
+                        if (this.gasCooldown <= 0 && gasClouds.length < maxClouds) {
+                            const inFocus = resistanceFocus && resistanceFocus.contains(this.x, this.y, 85);
+                            if (!inFocus) {
+                                gasClouds.push(new TearGasCloud(this.x, this.y));
+                                sfxGas();
+                            }
+                            this.gasCooldown = 8.5 + Math.random() * 6.0;
+                        }
+                    }
+
+                    let target = null, minDist = Infinity;
+                    if (playerRef && playerRef.getStrength()>0) {
+                        const d = Math.hypot(this.x-playerRef.x, this.y-playerRef.y);
+                        if (d<300) { target=playerRef; minDist=d; }
+                    }
+                    for (let c of citizens) {
+                        if (c.collected || c.scatter>0) continue;
+                        if (devConfig.edgeMode === 'rebote_repulsion' && (c.x < 55 || c.x > W-55 || c.y < 55 || c.y > H-55)) continue;
+                        const d = Math.hypot(this.x-c.x, this.y-c.y);
+                        if (d<190 && d<minDist) { target=c; minDist=d; }
+                    }
+                    if (target && minDist<250) {
+                        this.state = 'chase';
+                        const angle = Math.atan2(target.y-this.y, target.x-this.x);
+                        this.x += Math.cos(angle)*this.speed*1.2*dt*60;
+                        this.y += Math.sin(angle)*this.speed*1.2*dt*60;
+                        this.facing = Math.cos(angle) > 0 ? 1 : -1;
+                    } else {
+                        this.state = 'patrol';
+                        this.patrolTimer -= dt;
+                        if (this.patrolTimer<=0) { this.patrolAngle+=(Math.random()-0.5)*2; this.patrolTimer=2+Math.random()*3; }
+
+                        if (devConfig.edgeMode === 'rebote_repulsion') {
+                            const margin = 55;
+                            let sx = Math.cos(this.patrolAngle);
+                            let sy = Math.sin(this.patrolAngle);
+                            if (this.x < margin) sx += 0.9;
+                            if (this.x > W - margin) sx -= 0.9;
+                            if (this.y < margin) sy += 0.9;
+                            if (this.y > H - margin) sy -= 0.9;
+                            this.patrolAngle = Math.atan2(sy, sx);
+                        }
+
+                        this.x += Math.cos(this.patrolAngle)*this.speed*0.55*dt*60;
+                        this.y += Math.sin(this.patrolAngle)*this.speed*0.55*dt*60;
+                        this.facing = Math.cos(this.patrolAngle) > 0 ? 1 : -1;
+                    }
+
+                    if (devConfig.edgeMode !== 'clasico') {
+                        if (this.x <= this.radius) { this.x = this.radius; this.patrolAngle = Math.PI - this.patrolAngle; }
+                        else if (this.x >= W - this.radius) { this.x = W - this.radius; this.patrolAngle = Math.PI - this.patrolAngle; }
+                        if (this.y <= this.radius) { this.y = this.radius; this.patrolAngle = -this.patrolAngle; }
+                        else if (this.y >= H - this.radius) { this.y = H - this.radius; this.patrolAngle = -this.patrolAngle; }
+                    } else {
+                        this.x = Math.max(this.radius, Math.min(W-this.radius, this.x));
+                        this.y = Math.max(this.radius, Math.min(H-this.radius, this.y));
+                    }
+                }
+                draw(ctx) {
+                    if (this.stunTimer>0 && Math.floor(this.stunTimer*15)%2===0) return;
+                    
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+                    ctx.fillStyle = '#1e90ff'; ctx.fill();
+                    ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2; ctx.stroke();
+                    
+                    ctx.fillStyle = '#000';
+                    ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.emoji, this.x, this.y+2);
+
+                    if (this.stunTimer > 0.6) {
+                        ctx.font = '22px "Segoe UI Emoji", sans-serif';
+                        ctx.fillText('💬', this.x, this.y - this.radius - 10);
+                    }
+                }
+                stun(d) { this.stunTimer = d; this.state = 'stunned'; }
+            }
+
+            class SafeZone {
+                constructor(x, y, radius, permanent, name = '', message = '') {
+                    this.x = x; this.y = y; this.radius = radius;
+                    this.timer = permanent ? Infinity : 10; this.active = true;
+                    this.permanent = permanent;
+                    this.phase = Math.random()*Math.PI*2;
+                    this.name = name;
+                    this.message = message;
+                    this.messageShown = false; 
+                }
+                update(dt) {
+                    if (!this.permanent) { this.timer -= dt; if (this.timer <= 0) this.active = false; }
+                    this.phase += dt*2;
+                }
+                draw(ctx) {
+                    const alpha = this.active ? (0.3 + Math.sin(this.phase)*0.1) : 0;
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(46, 213, 115, ${alpha})`; ctx.fill();
+                    ctx.strokeStyle = `rgba(46, 213, 115, ${alpha * 2})`; ctx.lineWidth = 2;
+                    ctx.setLineDash([8,4]); ctx.stroke(); ctx.setLineDash([]);
+
+                    if (healthUnlocked && this === resistanceFocus) {
+                        ctx.font = '18px "Segoe UI Emoji", sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('🏥', this.x, this.y + this.radius - 14);
+                    }
+                    
+                    if (this.name) {
+                        ctx.fillStyle = '#2ed573'; 
+                        ctx.font = 'bold 12px "Inter", sans-serif'; 
+                        ctx.textAlign = 'center';
+                        ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+                        ctx.fillText(this.name, this.x, this.y - this.radius - 10);
+                        ctx.shadowBlur = 0;
+                    }
+                }
+                contains(px, py, r=0) { return Math.hypot(px - this.x, py - this.y) < this.radius + r; }
+            }
+
+            class Flag {
+                constructor(x,y) { this.x=x; this.y=y; this.poleX=x; this.poleY=y-25; this.wave=0; this.active=true; }
+                update(dt) { this.wave+=dt*5; }
+                draw(ctx) {
+                    ctx.strokeStyle='#bdc3c7'; ctx.lineWidth=4;
+                    ctx.beginPath(); ctx.moveTo(this.poleX,this.poleY); ctx.lineTo(this.poleX,this.poleY+50); ctx.stroke();
+                    const off=Math.sin(this.wave)*4;
+                    ctx.fillStyle='#ff3838';
+                    ctx.beginPath(); ctx.moveTo(this.poleX,this.poleY); ctx.lineTo(this.poleX+40+off,this.poleY+15);
+                    ctx.lineTo(this.poleX+35+off,this.poleY+25); ctx.lineTo(this.poleX,this.poleY+30); ctx.closePath(); ctx.fill();
+                    ctx.fillStyle='white'; ctx.font='bold 16px sans-serif'; ctx.textAlign='center';
+                    ctx.fillText('★',this.poleX+18,this.poleY+18); ctx.textAlign='start';
+                    const pulse = (Math.sin(this.wave*1.5)+1)/2;
+                    ctx.beginPath(); ctx.arc(this.poleX+18, this.poleY+25, 40+pulse*22, 0, Math.PI*2);
+                    ctx.strokeStyle = 'rgba(255,56,56,'+(0.55-pulse*0.4)+')'; ctx.lineWidth=2; ctx.stroke();
+                    const bobY = Math.sin(this.wave*1.8)*5;
+                    ctx.fillStyle = '#ff3838';
+                    ctx.beginPath(); ctx.moveTo(this.poleX+10, this.poleY-26+bobY); ctx.lineTo(this.poleX+26, this.poleY-26+bobY); ctx.lineTo(this.poleX+18, this.poleY-13+bobY); ctx.closePath(); ctx.fill();
+                }
+            }
+
+            class Boss {
+                constructor(x,y) {
+                    this.x=x; this.y=y; this.radius=45; this.speed=2.0; this.hp=100; this.maxHp=100;
+                    this.phase=1; this.angle=0; this.reach=65; this.cooldown=0;
+                    this.charge=false; this.chargeTarget=null; this.stunTimer=0;
+                }
+                update(dt, playerRef) {
+                    if (this.stunTimer>0) { this.stunTimer-=dt; this.angle+=dt*8; return; }
+                    this.angle += dt*(12+this.phase*3);
+                    this.cooldown -= dt;
+                    if (this.hp<50 && this.phase===1) { this.phase=2; this.speed=2.8; }
+                    if (this.charge) {
+                        const ang = Math.atan2(this.chargeTarget.y-this.y, this.chargeTarget.x-this.x);
+                        this.x += Math.cos(ang)*6*dt*60;
+                        this.y += Math.sin(ang)*6*dt*60;
+                        if (Math.hypot(this.x-this.chargeTarget.x, this.y-this.chargeTarget.y)<30 || this.cooldown<-1) {
+                            this.charge=false; this.cooldown=1.5;
+                        }
+                    } else if (playerRef && this.cooldown<=0) {
+                        const d = Math.hypot(this.x-playerRef.x, this.y-playerRef.y);
+                        if (d<350) {
+                            this.chargeTarget = {x:playerRef.x, y:playerRef.y};
+                            this.charge = true;
+                            this.cooldown = 2.5 - this.phase*0.5;
+                        } else {
+                            const ang = Math.atan2(playerRef.y-this.y, playerRef.x-this.x);
+                            this.x += Math.cos(ang)*this.speed*dt*60;
+                            this.y += Math.sin(ang)*this.speed*dt*60;
+                        }
+                    }
+                    this.x = Math.max(this.radius, Math.min(W-this.radius, this.x));
+                    this.y = Math.max(this.radius, Math.min(H-this.radius, this.y));
+                }
+                draw(ctx) {
+                    if (assets.boss.complete && assets.boss.naturalWidth > 0) {
+                        ctx.save();
+                        ctx.translate(this.x, this.y);
+                        if (this.chargeTarget && this.chargeTarget.x < this.x) {
+                            ctx.scale(-1, 1);
+                        }
+                        const bob = Math.sin(Date.now()*0.01) * 3;
+                        ctx.drawImage(assets.boss, -this.radius, -this.radius + bob, this.radius * 2, this.radius * 2);
+                        ctx.restore();
+                    } else {
+                        ctx.fillStyle = '#1e90ff';
+                        ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill();
+                        ctx.strokeStyle = '#f1c40f'; ctx.lineWidth=4; ctx.stroke();
+                        ctx.fillStyle = '#fff'; ctx.font='20px sans-serif'; ctx.textAlign='center';
+                        ctx.fillText('BOSS', this.x, this.y+7);
+                    }
+                    
+                    ctx.fillStyle = '#2f3542';
+                    ctx.fillRect(this.x - 40, this.y - this.radius - 20, 80, 10);
+                    ctx.fillStyle = '#ff3838';
+                    ctx.fillRect(this.x - 40, this.y - this.radius - 20, 80 * (this.hp / this.maxHp), 10);
+                    ctx.strokeStyle = '#fff';
+                    ctx.strokeRect(this.x - 40, this.y - this.radius - 20, 80, 10);
+                }
+                hit(dmg) { 
+                    this.hp -= dmg; 
+                    this.stunTimer=0.8; 
+                    this.charge=false; 
+                    if (this.hp<=0) this.hp=0; 
+                    cameraShake = 15;
+                    
+                    for(let i=0; i<15; i++) {
+                        particles.push({
+                            x: this.x, y: this.y,
+                            color: '#ff3838', life: 1.0,
+                            vx: (Math.random()-0.5)*200, vy: (Math.random()-0.5)*200,
+                            radius: 4,
+                            update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                            draw(ctx) { ctx.globalAlpha = this.life; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                            alive() { return this.life>0; }
+                        });
+                    }
+                }
+            }
+
+            function spawnHealParticles(x, y) {
+                for (let i = 0; i < 6; i++) {
+                    particles.push({
+                        x: x + (Math.random()-0.5)*20,
+                        y: y + (Math.random()-0.5)*20,
+                        color: '#2ed573', life: 0.6,
+                        vx: (Math.random()-0.5)*60, vy: -35 - Math.random()*35,
+                        radius: 3.5,
+                        update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                        draw(ctx) { ctx.globalAlpha=this.life*1.6; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                        alive() { return this.life>0; }
+                    });
+                }
+            }
+
+            // ==================== INICIALIZACIÓN DE NIVELES ====================
+            function syncUnlocksForLevel(lvl) {
+                if (lvl > 1) paceUnlocked = true;
+                if (lvl > 2) healthUnlocked = true;
+                if (lvl > 3) maskUnlocked = true;
+                if (lvl > 4) inclusiveUnlocked = true;
+            }
+
+            function initLevel(lvl) {
+                resizeCanvas();
+                currentLevel = lvl;
+                syncUnlocksForLevel(lvl);
+                const cfg = getLevelConfig(lvl);
+                citizens = []; policeUnits = []; safeZones = []; particles = []; gasClouds = []; flag = null; boss = null;
+                mobilization = { active:false, timer:0, outcomeState:null, isFinal:false };
+                floatingMessages = [];
+                comboStreak = 0; comboMultiplier = 1;
+                inclusiveCooldown = 0;
+                bossWave = { active:false, timer:0, pending:0 };
+                
+                const focusData = RESISTANCE_FOCUS[lvl];
+                resistanceFocus = new SafeZone(W*0.25, H*0.5, 62, true, focusData.name, focusData.message);
+                
+                player = new Player(resistanceFocus.x, resistanceFocus.y);
+                brigadista = healthUnlocked ? new HealthBrigadista(resistanceFocus.x + 30, resistanceFocus.y + 30) : null;
+
+                for (let i=0; i<cfg.citizens; i++) {
+                    citizens.push(new Citizen(W*0.32+Math.random()*W*0.55, 50+Math.random()*(H-100), cfg.type));
+                }
+                for (let i=0; i<cfg.police; i++) {
+                    policeUnits.push(new PoliceUnit(W*0.6+Math.random()*W*0.3, 50+Math.random()*(H-100), cfg.policeSpeed));
+                }
+                gameState = STATE.PLAYING;
+                cameraShake = 0;
+            }
+
+            function initBossLevel() {
+                resizeCanvas();
+                currentLevel = BOSS_LEVEL_NUM;
+                syncUnlocksForLevel(BOSS_LEVEL_NUM);
+                const cfg = { citizens:22, police:3, policeSpeed:1.6, citizenSpeed:1.4, required:15, type:'mixto' };
+                citizens = []; policeUnits = []; safeZones = []; particles = []; gasClouds = []; flag = null;
+                mobilization = { active:false, timer:0, outcomeState:null, isFinal:false };
+                floatingMessages = [];
+                comboStreak = 0; comboMultiplier = 1;
+                inclusiveCooldown = 0;
+                bossCitizensCaught = 0;
+                bossWavesFired = 0;
+                bossWave = { active:false, timer:0, pending:0 };
+                bossSpawnTimer = 3.0;
+                boss = new Boss(W*0.75, H*0.5);
+                
+                const bossFocus = RESISTANCE_FOCUS[BOSS_LEVEL_NUM];
+                resistanceFocus = new SafeZone(W*0.25, H*0.5, 62, true, bossFocus.name, bossFocus.message);
+                
+                player = new Player(resistanceFocus.x, resistanceFocus.y);
+                brigadista = healthUnlocked ? new HealthBrigadista(resistanceFocus.x + 30, resistanceFocus.y + 30) : null;
+                
+                const allTypes = ['jubilado','discapacitado','cientifico','feminista','universitario'];
+                for (let i=0; i<cfg.citizens; i++) {
+                    citizens.push(new Citizen(W*0.2+Math.random()*W*0.5, 45+Math.random()*(H-90), allTypes[Math.floor(Math.random()*allTypes.length)]));
+                }
+                for (let i=0; i<cfg.police; i++) policeUnits.push(new PoliceUnit(W*0.7+i*60, H*0.4+i*60, cfg.policeSpeed));
+                
+                const prevLevels = [1,2,3,4,5];
+                const positions = [
+                    {x:W*0.7, y:H*0.22}, {x:W*0.7, y:H*0.52}, {x:W*0.7, y:H*0.82},
+                    {x:W*0.45, y:H*0.82}, {x:W*0.15, y:H*0.82}
+                ];
+                prevLevels.forEach((lvl, i) => {
+                    const fd = RESISTANCE_FOCUS[lvl];
+                    if (fd) {
+                        const pos = positions[i] || {x:W*0.5, y:H*0.5};
+                        safeZones.push(new SafeZone(pos.x, pos.y, 42, true, fd.name, '')); 
+                    }
+                });
+                gameState = STATE.BOSS_INTRO;
+                bossIntroTimer = 0;
+                cameraShake = 0;
+            }
+
+            // ==================== ACTUALIZACIÓN DEL HUD ====================
+            function updateHUD(cfg) {
+                const titlePrefix = currentLevel <= MAX_REGULAR_LEVELS ? `Nv.${currentLevel} · ` : `FINAL · `;
+                hudLevelTitle.textContent = titlePrefix + (LEVEL_TITLES[currentLevel] || `Nivel ${currentLevel}`);
+
+                let req, current;
+                if (currentLevel <= MAX_REGULAR_LEVELS) {
+                    req = cfg ? cfg.required : 1;
+                    current = player ? player.getStrength() : 0;
+                } else {
+                    const idx = Math.min(bossWavesFired, BOSS_WAVES_AT.length - 1);
+                    req = BOSS_WAVES_AT[idx];
+                    current = Math.min(bossCitizensCaught, req);
+                }
+
+                if (flag) {
+                    hudOrgCounter.textContent = `🚩 ¡BANDERA LISTA! (${current}/${req})`;
+                    hudProgress.classList.add('ready');
+                } else {
+                    hudOrgCounter.textContent = `👥 ${current} / ${req}`;
+                    hudProgress.classList.remove('ready');
+                }
+                hudProgress.style.width = Math.min(100, (current/req)*100) + '%';
+                
+                hudTimer.textContent = formatTime(totalTime);
+                hudLives.textContent = '❤'.repeat(Math.max(0, lives)) || '💔';
+                hudCombo.textContent = '×' + comboMultiplier;
+                hudComboPanel.classList.toggle('combo-active', comboMultiplier > 1);
+
+                // Actualizar Badges de Conquistas / Poderes
+                powerPaceBadge.classList.toggle('unlocked', paceUnlocked);
+                statusPace.textContent = paceUnlocked ? 'ACTIVA' : (currentLevel === 1 ? 'NV.1' : '🔒');
+
+                powerHealthBadge.classList.toggle('unlocked', healthUnlocked);
+                statusHealth.textContent = healthUnlocked ? 'ACTIVA' : '🔒';
+
+                powerMaskBadge.classList.toggle('unlocked', maskUnlocked);
+                statusMask.textContent = maskUnlocked ? 'ACTIVA' : '🔒';
+
+                powerInclusiveBadge.classList.toggle('unlocked', inclusiveUnlocked);
+                powerInclusiveBadge.classList.toggle('on-cooldown', inclusiveUnlocked && inclusiveCooldown > 0);
+                statusInclusive.textContent = !inclusiveUnlocked ? '🔒' : (inclusiveCooldown > 0 ? inclusiveCooldown.toFixed(1)+'s' : 'LISTO');
+            }
+
+            // ==================== INTERACCIONES Y COLISIONES ====================
+            function playerCollect() {
+                for (let i = citizens.length - 1; i >= 0; i--) {
+                    const c = citizens[i];
+                    if (c.collected || c.pickupLock > 0) continue;
+                    if (devConfig.edgeMode === 'clasico' && c.scatter > 0) continue;
+
+                    if (Math.hypot(player.x-c.x, player.y-c.y) < player.radius+c.radius) {
+                        player.addCitizen(c);
+                        citizens.splice(i, 1);
+                        comboStreak++;
+                        if (comboStreak % 5 === 0 && comboMultiplier < 4) {
+                            comboMultiplier++;
+                            if (comboMultiplier > maxComboReached) maxComboReached = comboMultiplier;
+                            floatingMessages.push({ text:'¡COMBO ×'+comboMultiplier+'!', life:1.3, color:'#ff3838', x:player.x, y:player.y-44, small:true });
+                        }
+                        
+                        if (gameState === STATE.BOSS_BATTLE) {
+                            bossCitizensCaught++;
+                            if (bossWavesFired < BOSS_WAVES_AT.length && bossCitizensCaught >= BOSS_WAVES_AT[bossWavesFired]) {
+                                bossWavesFired++;
+                                triggerBossWave();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            function policeCapture() {
+                for (let p of policeUnits) {
+                    if (p.stunTimer>0) continue;
+                    for (let c of citizens) {
+                        if (c.collected || c.scatter>0) continue;
+                        if (Math.hypot(p.x-c.x, p.y-c.y) < p.radius+c.radius) {
+                            if (devConfig.edgeMode === 'clasico') {
+                                c.scatter = 2;
+                            } else {
+                                c.scatter = 0.6;
+                                c.wanderAngle = Math.atan2(c.y - p.y, c.x - p.x) + (Math.random()-0.5)*0.5;
+                            }
+                        }
+                    }
+                    const contact = Math.hypot(p.x-player.x, p.y-player.y) < p.radius+player.radius+8;
+                    if (!contact) continue;
+                    
+                    if (player.getStrength()>0) {
+                        if (player.shield) { 
+                            p.stun(1.5); 
+                            cameraShake = 5;
+                            for(let i=0; i<8; i++) {
+                                particles.push({
+                                    x: p.x, y: p.y,
+                                    color: '#2ed573', life: 0.4,
+                                    vx: (Math.random()-0.5)*150, vy: (Math.random()-0.5)*150,
+                                    radius: 3,
+                                    update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                                    draw(ctx) { ctx.globalAlpha = this.life*2; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                                    alive() { return this.life>0; }
+                                });
+                            }
+                        }
+                        else if (player.invuln<=0) { player.loseCitizens(Math.min(3, player.getStrength())); resetCombo(); }
+                    } else {
+                        if (player.invuln<=0) {
+                            lives--;
+                            player.invuln = 2.0;
+                            cameraShake = 18;
+                            sfxBattle();
+                            floatingMessages.push({ text:'¡DETENIDX! −1 ❤', life:1.6, color:'#ff6b81', x:player.x, y:player.y-44 });
+                            if (lives <= 0) setGameOver();
+                        }
+                    }
+                }
+            }
+
+            function bossCapture() {
+                if (!boss || gameState !== STATE.BOSS_BATTLE) return;
+                if (boss.stunTimer > 0) return;
+
+                const contact = Math.hypot(boss.x - player.x, boss.y - player.y) < boss.radius + player.radius + 10;
+                if (!contact) return;
+
+                if (player.shield) {
+                    boss.stunTimer = Math.max(boss.stunTimer, 1.2);
+                    player.shield = false; player.shieldTimer = 0;
+                    cameraShake = 12;
+                    playBeep(300, 0.2, 'square', 0.1);
+                    floatingMessages.push({ text:'¡ESCUDO POPULAR!', life:1.4, color:'#2ed573', x:boss.x, y:boss.y - boss.radius - 20 });
+                    return;
+                }
+
+                if (player.invuln > 0) return;
+
+                if (player.getStrength() > 0) {
+                    player.loseCitizens(Math.min(3, player.getStrength()));
+                    resetCombo();
+                    floatingMessages.push({ text:'¡TE DESORGANIZÓ!', life:1.2, color:'#ff6b81', x:player.x, y:player.y-40, small:true });
+                } else {
+                    lives--;
+                    player.invuln = 2.0;
+                    cameraShake = 18;
+                    sfxBattle();
+                    floatingMessages.push({ text:'¡DETENIDX! −1 ❤', life:1.6, color:'#ff6b81', x:player.x, y:player.y-44 });
+                    if (lives <= 0) setGameOver();
+                }
+            }
+
+            function resetCombo() {
+                comboStreak = 0;
+                if (comboMultiplier > 1) {
+                    floatingMessages.push({ text:'Combo perdido', life:1.0, color:'#ff6b81', x:player.x, y:player.y-40, small:true });
+                }
+                comboMultiplier = 1;
+            }
+
+            function checkNearMiss() {
+                for (let p of policeUnits) {
+                    if (p.stunTimer > 0) continue;
+                    const d = Math.hypot(player.x-p.x, player.y-p.y);
+                    const hitDist = player.radius + p.radius + 8;
+                    if (d > hitDist && d < hitDist + 28 && p.nearMissCd <= 0) {
+                        p.nearMissCd = 1.5;
+                        playBeep(1400, 0.07, 'sine', 0.06);
+                        floatingMessages.push({ text:'¡Cerca!', life:0.9, color:'#7bed9f', x:player.x, y:player.y-34, small:true });
+                    }
+                }
+            }
+
+            function healCollectedInPosta() {
+                if (!player) return;
+                let healedCount = 0;
+                if (player.inGas && player.gasImmunity <= 0) {
+                    player.gasImmunity = 3.5;
+                    healedCount++;
+                }
+                for (let c of player.collected) {
+                    if (c.gassed > 0) {
+                        c.gassed = 0;
+                        c.gasImmunity = 4.0;
+                        healedCount++;
+                    }
+                }
+                if (healedCount > 0) {
+                    sfxHeal();
+                    spawnHealParticles(player.x, player.y);
+                    floatingMessages.push({
+                        text: `🏥 ¡Posta Sanitaria curó a la columna!`,
+                        life: 1.5, color: '#2ed573',
+                        x: player.x, y: player.y - 45, small: true
+                    });
+                }
+            }
+
+            function safeZoneProtect() {
+                if (resistanceFocus && resistanceFocus.active) {
+                    const insideMain = resistanceFocus.contains(player.x, player.y, player.radius);
+                    if (insideMain && !resistanceFocus.messageShown) {
+                        floatingMessages.push({
+                            text: resistanceFocus.message, life: 9999, color: '#2ed573',
+                            x: W/2, y: H/2 - 60, id: 'resistance'
+                        });
+                        resistanceFocus.messageShown = true;
+                    } else if (!insideMain && resistanceFocus.messageShown) {
+                        resistanceFocus.messageShown = false;
+                        floatingMessages = floatingMessages.filter(m => m.id !== 'resistance');
+                    }
+                    if (insideMain) {
+                        player.invuln = Math.max(player.invuln, 0.4);
+                        if (devConfig.healMode === 'ambos' || devConfig.healMode === 'posta') healCollectedInPosta();
+                        for (let p of policeUnits) if (resistanceFocus.contains(p.x,p.y,p.radius)) p.stun(0.5);
+                    }
+                }
+                for (let sz of safeZones) {
+                    if (!sz.active) continue;
+                    if (sz.contains(player.x, player.y, player.radius)) {
+                        player.invuln = Math.max(player.invuln, 0.3);
+                        if (devConfig.healMode === 'ambos' || devConfig.healMode === 'posta') healCollectedInPosta();
+                        for (let p of policeUnits) if (sz.contains(p.x,p.y,p.radius)) p.stun(0.5);
+                    }
+                }
+                if (boss && gameState === STATE.BOSS_BATTLE) {
+                    if (resistanceFocus.contains(player.x, player.y, player.radius) && !resistanceFocus._bossTaunted) {
+                        resistanceFocus._bossTaunted = true;
+                        floatingMessages.push({
+                            text: 'Esa zona no te sirve contra mí 😏',
+                            life: 2.5, color: '#ff6b81',
+                            x: boss.x, y: boss.y - boss.radius - 25, small: true
+                        });
+                        setTimeout(() => { if (resistanceFocus) resistanceFocus._bossTaunted = false; }, 6000);
+                    }
+                }
+            }
+
+            function checkFlagSpawn(required) {
+                if (flag || mobilization.active) return;
+                if (player.getStrength() >= required) {
+                    flag = new Flag(Math.random()<0.5?75:W-75, H*0.28+Math.random()*H*0.44);
+                    sfxFlagSpawn();
+                    
+                    floatingMessages.push({
+                        text: FLAG_MESSAGES[currentLevel] || "¡LA BANDERA HA APARECIDO!", 
+                        life: 4, color: '#ff3838',
+                        x: W/2, y: H/4, id: 'flag_spawn'
+                    });
+                }
+            }
+
+            function checkFlagCollection() {
+                if (!flag || mobilization.active) return false;
+                if (Math.hypot(player.x-flag.poleX, player.y-(flag.poleY+25)) < 44) {
+                    mobilization.active = true;
+                    mobilization.timer = 3.0;
+                    mobilization.isFinal = true;
+                    flag = null;
+                    gasClouds = [];
+                    sfxMobilization();
+                    mobilization.outcomeState = STATE.LEVEL_COMPLETE;
+                    cameraShake = 20;
+                    return true;
+                }
+                return false;
+            }
+
+            function spawnTideParticle() {
+                const colors = ['#ff3838','#ff6b6b','#ffffff'];
+                particles.push({
+                    x: -50, y: Math.random()*H,
+                    color: colors[Math.floor(Math.random()*3)], life: 3,
+                    vx: 400+Math.random()*300, vy: (Math.random()-0.5)*80,
+                    radius: 8 + Math.random()*6, isTide: true,
+                    update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                    draw(ctx) {
+                        ctx.globalAlpha = Math.min(1, this.life);
+                        ctx.fillStyle = this.color;
+                        ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill();
+                        ctx.globalAlpha = 1;
+                    },
+                    alive() { return this.life>0; }
+                });
+            }
+
+            // ==================== PODERES ACTIVOS (E) ====================
+            function triggerBossWave() {
+                if (bossWave.active) {
+                    bossWave.pending++;
+                    return;
+                }
+                bossWave.active = true;
+                bossWave.timer = 2.4;
+                sfxMobilization();
+                cameraShake = 22;
+                floatingMessages.push({
+                    text: '¡OLA POPULAR!', life: 2.5, color: '#ff3838',
+                    x: W/2, y: H*0.28, id: 'wave_msg'
+                });
+            }
+
+            // Poder Nivel 4: Lenguaje Inclusivo (Tecla E)
+            function useInclusiveAbility() {
+                if (!inclusiveUnlocked) return;
+                if (inclusiveCooldown > 0) return;
+                if (gameState !== STATE.PLAYING && gameState !== STATE.BOSS_BATTLE) return;
+                if (!player) return;
+                
+                inclusiveCooldown = 5.0;
+                inclusiveFlash = 1.0;
+                inclusiveFlashX = player.x;
+                inclusiveFlashY = player.y;
+                cameraShake = 14;
+                sfxInclusive();
+                
+                for (let p of policeUnits) {
+                    p.stun(2.8);
+                    for (let i=0;i<4;i++) {
+                        particles.push({
+                            x: p.x, y: p.y,
+                            color: '#a29bfe', life: 0.6,
+                            vx: (Math.random()-0.5)*120, vy: (Math.random()-0.5)*120,
+                            radius: 3,
+                            update(dt) { this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt; },
+                            draw(ctx) { ctx.globalAlpha=this.life*1.5; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; },
+                            alive() { return this.life>0; }
+                        });
+                    }
+                }
+                
+                floatingMessages.push({
+                    text: '¡Vamos les pibis!',
+                    life: 1.6, color: '#a29bfe',
+                    x: player.x, y: player.y - 50, id: 'inclusive_msg'
+                });
+
+                if (boss && gameState === STATE.BOSS_BATTLE) {
+                    const dBoss = Math.hypot(boss.x - player.x, boss.y - player.y);
+                    if (dBoss < 450) {
+                        floatingMessages.push({
+                            text: '¡No me hables en inclusivo!',
+                            life: 1.8, color: '#ff6b81',
+                            x: boss.x, y: boss.y - boss.radius - 25, small: true
+                        });
+                    }
+                }
+            }
+
+            powerInclusiveBadge.addEventListener('click', (e) => { e.stopPropagation(); useInclusiveAbility(); });
+
+            // Botones rápidos del panel de desarrollo
+            document.querySelectorAll('[data-goto]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    modal.classList.remove('active');
+                    const lvl = parseInt(btn.getAttribute('data-goto'), 10);
+                    if (lvl <= MAX_REGULAR_LEVELS) initLevel(lvl);
+                    else initBossLevel();
+                    devPanel.classList.remove('open');
+                });
+            });
+            document.getElementById('dev-unlock-all').addEventListener('click', (e) => {
+                e.stopPropagation();
+                paceUnlocked = true; healthUnlocked = true; maskUnlocked = true; inclusiveUnlocked = true;
+                if (!brigadista && resistanceFocus) {
+                    brigadista = new HealthBrigadista(resistanceFocus.x + 30, resistanceFocus.y + 30);
+                }
+                floatingMessages.push({ text:'🔓 ¡Todas las conquistas activas!', life:2.0, color:'#ff3838', x:W/2, y:H/2 });
+                devPanel.classList.remove('open');
+            });
+            document.getElementById('dev-spawn-gas').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (player) {
+                    gasClouds.push(new TearGasCloud(
+                        Math.max(80, Math.min(W-80, player.x + 110)),
+                        Math.max(80, Math.min(H-80, player.y))
+                    ));
+                    sfxGas();
+                }
+                devPanel.classList.remove('open');
+            });
+
+            // ==================== RENDERIZADO ====================
+            function drawBossTaunt(c2) {
+                c2.font = `bold ${Math.min(15, Math.max(11, W/55))}px "Inter", sans-serif`;
+                const tw = c2.measureText(bossTauntText).width;
+                const bx = boss.x, by = boss.y - boss.radius - 48;
+                c2.fillStyle = 'rgba(255,255,255,0.92)';
+                c2.beginPath(); c2.roundRect(bx - tw/2 - 12, by - 14, tw + 24, 28, 8); c2.fill();
+                c2.beginPath(); c2.moveTo(bx - 6, by + 13); c2.lineTo(bx + 8, by + 13); c2.lineTo(bx + 2, by + 24); c2.closePath(); c2.fill();
+                c2.fillStyle = '#111'; c2.textAlign = 'center'; c2.textBaseline = 'middle';
+                c2.fillText(bossTauntText, bx, by + 1);
+                c2.textBaseline = 'alphabetic';
+            }
+
+            function drawWorld() {
+                if (!W || !H) return;
+                ctx.clearRect(0, 0, W, H);
+                
+                ctx.save();
+                if (cameraShake > 0) {
+                    const sx = (Math.random()-0.5)*cameraShake;
+                    const sy = (Math.random()-0.5)*cameraShake;
+                    ctx.translate(sx, sy);
+                }
+
+                if (resistanceFocus && resistanceFocus.active) resistanceFocus.draw(ctx);
+                safeZones.forEach(s=>s.active&&s.draw(ctx));
+                gasClouds.forEach(g=>g.draw(ctx));
+                
+                citizens.forEach(c=>!c.collected&&c.draw(ctx));
+                if (player) player.collected.forEach(c=>c.drawCollected(ctx, c.x, c.y));
+                if (brigadista && healthUnlocked) brigadista.draw(ctx);
+                
+                policeUnits.forEach(p=>p.draw(ctx));
+                if (player) player.draw(ctx);
+                if (boss && (gameState===STATE.BOSS_BATTLE||gameState===STATE.BOSS_INTRO)) boss.draw(ctx);
+                if (bossTauntText && gameState===STATE.BOSS_BATTLE && bossTauntTimer > 2 && boss) drawBossTaunt(ctx);
+                if (flag) flag.draw(ctx);
+                
+                particles.forEach(p=>p.draw(ctx));
+
+                if (inclusiveFlash > 0) {
+                    const r = (1 - inclusiveFlash) * 650;
+                    ctx.beginPath();
+                    ctx.arc(inclusiveFlashX, inclusiveFlashY, r, 0, Math.PI*2);
+                    ctx.strokeStyle = `rgba(162, 155, 254, ${Math.max(0, inclusiveFlash)})`;
+                    ctx.lineWidth = 8;
+                    ctx.stroke();
+                }
+                
+                ctx.restore();
+
+                floatingMessages.forEach(m=>{
+                    if (m.small) {
+                        ctx.font = `bold ${Math.min(14, Math.max(10, W/60))}px "Inter", sans-serif`;
+                    } else if (m.id === 'flag_spawn') {
+                        ctx.font = `bold ${Math.min(18, Math.max(12, W/45))}px "Press Start 2P", cursive`;
+                    } else {
+                        ctx.font = `bold ${Math.min(20, Math.max(14, W/35))}px "Inter", sans-serif`;
+                    }
+                    ctx.textAlign = 'center';
+                    
+                    const lines = m.text.split('\n');
+                    const lineHeight = m.id === 'flag_spawn' ? Math.min(24, Math.max(16, W/35)) : Math.min(26, Math.max(18, W/30));
+                    
+                    lines.forEach((line, i) => {
+                        const ly = m.y + (i - (lines.length-1)/2)*lineHeight;
+                        ctx.fillStyle = '#000';
+                        ctx.fillText(line, m.x+2, ly+2);
+                        ctx.fillStyle = m.color;
+                        ctx.fillText(line, m.x, ly);
+                    });
+                });
+            }
+
+            function drawOverlay(title, subtitle, actionText, bgAlpha = 0.84) {
+                ctx.fillStyle = `rgba(20, 20, 36, ${bgAlpha})`; 
+                ctx.fillRect(0,0,W,H);
+                
+                ctx.fillStyle = '#ff3838'; 
+                let titleSize = Math.min(26, W / 26);
+                ctx.font = `bold ${titleSize}px "Press Start 2P", cursive`; 
+                ctx.textAlign = 'center';
+                ctx.shadowColor = '#000'; ctx.shadowBlur = 8;
+                
+                if (title === 'UNIDAD CONTRA EL PRESIDENTE') {
+                     ctx.fillText('UNIDAD CONTRA EL', W/2, H*0.33 - titleSize/2 - 5);
+                     ctx.fillText('PRESIDENTE', W/2, H*0.33 + titleSize/2 + 5);
+                     
+                     ctx.fillStyle = '#a0a0a0'; 
+                     ctx.font = `${Math.min(12, Math.max(9, W/50))}px "Inter", sans-serif`;
+                     ctx.shadowBlur = 0;
+                     ctx.fillText('Música: La Internacional (8-bit) por Red & Black Archive (RednBlackArchive)', W/2, H - 22);
+                } else if (title === 'LA ORGANIZACIÓN FRACASÓ') {
+                     ctx.fillText('LA ORGANIZACIÓN', W/2, H*0.33 - titleSize/2 - 5);
+                     ctx.fillText('FRACASÓ', W/2, H*0.33 + titleSize/2 + 5);
+                } else {
+                     ctx.fillText(title, W/2, H*0.33);
+                }
+                
+                if (subtitle) {
+                    ctx.fillStyle = '#e0e0e0'; 
+                    ctx.font = `${Math.min(18, Math.max(12, W/40))}px "Inter", sans-serif`;
+                    ctx.shadowBlur = 4;
+                    const lines = subtitle.split('\n');
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, W/2, H*0.52 + i * Math.min(25, W/35));
+                    });
+                }
+                
+                ctx.fillStyle = '#ff3838'; 
+                ctx.font = `bold ${Math.min(16, Math.max(10, W/45))}px "Press Start 2P", cursive`;
+                ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
+                ctx.fillText(actionText, W/2, H*0.82);
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+
+            function drawAbilityUnlockOverlay(lvl) {
+                const info = UNLOCK_INFO[lvl];
+                if (!info) return;
+                ctx.fillStyle = 'rgba(18, 18, 32, 0.94)';
+                ctx.fillRect(0, 0, W, H);
+                
+                ctx.font = `${Math.min(44, W/18)}px "Segoe UI Emoji", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(info.icon, W/2, H*0.16);
+
+                let titleSize = Math.min(21, W / 32);
+                ctx.fillStyle = info.color;
+                ctx.font = `bold ${titleSize}px "Press Start 2P", cursive`;
+                ctx.shadowColor = '#000'; ctx.shadowBlur = 8;
+                ctx.fillText(info.title1, W/2, H*0.26);
+                ctx.fillText(info.title2, W/2, H*0.26 + titleSize + 10);
+                
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#e0e0e0';
+                ctx.font = `${Math.min(16, Math.max(12, W/44))}px "Inter", sans-serif`;
+                info.lines.forEach((line, i) => {
+                    ctx.fillText(line, W/2, H*0.42 + i * Math.min(24, W/36));
+                });
+                
+                ctx.fillStyle = info.color;
+                ctx.font = `bold ${Math.min(13, Math.max(9, W/55))}px "Inter", sans-serif`;
+                ctx.fillText(info.sub, W/2, H*0.76);
+                
+                ctx.fillStyle = '#ff3838';
+                ctx.font = `bold ${Math.min(15, Math.max(10, W/45))}px "Press Start 2P", cursive`;
+                ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
+                ctx.fillText('CLIC O ENTER PARA CONTINUAR', W/2, H*0.89);
+                ctx.globalAlpha = 1;
+            }
+
+            // ==================== MODAL DE VIDEO ENTRE NIVELES ====================
+            function showLevelVideoModal(lvl, onContinue) {
+                const vData = LEVEL_VIDEOS[lvl];
+                if (!devConfig.videosEnabled || !vData) {
+                    onContinue();
+                    return;
+                }
+                const bgm = document.getElementById('bgm');
+                const wasPlayingBgm = bgm && !bgm.paused && !bgm.muted;
+                if (wasPlayingBgm) bgm.pause();
+
+                modal.classList.add('active');
+                modal.innerHTML = `
+                    <h2>🎬 ${escapeHtml(LEVEL_TITLES[lvl])}</h2>
+                    <p>${escapeHtml(vData.caption)}</p>
+                    <div class="video-box">
+                        <video id="cutscene-video" src="${escapeHtml(vData.src)}" controls autoplay playsinline></video>
+                    </div>
+                    <button id="skip-video-btn">CONTINUAR / SALTAR VIDEO ⏭️</button>
+                `;
+                const vid = document.getElementById('cutscene-video');
+                const btn = document.getElementById('skip-video-btn');
+                let finished = false;
+                const finish = () => {
+                    if (finished) return;
+                    finished = true;
+                    if (vid) { vid.pause(); vid.src = ''; }
+                    modal.classList.remove('active');
+                    if (wasPlayingBgm) bgm.play().catch(()=>{});
+                    onContinue();
+                };
+                btn.onclick = finish;
+                if (vid) {
+                    vid.onended = finish;
+                    vid.onerror = finish;
+                }
+            }
+
+            // ==================== MODAL VICTORIA / RANKING ====================
+            function showVictoryModal() {
+                modal.classList.add('active');
+                modal.innerHTML = `
+                    <h2>¡VICTORIA TOTAL!</h2>
+                    <p>El presidente fue derrotado por la unidad popular.</p>
+                    <p>Tiempo total: <strong style="color:#ff3838">${formatTime(totalTime)}</strong> · Racha máx: <strong style="color:#eccc68">×${maxComboReached}</strong></p>
+                    <p>Puntaje Final: <strong style="color:#eccc68">${score}</strong></p>
+                    <p style="margin-top:14px;">Ingresá tu nombre para el ranking:</p>
+                    <input id="name-input" maxlength="14" placeholder="Tu nombre" autocomplete="off">
+                    <button id="save-score-btn">GUARDAR EN RANKING</button>
+                `;
+                const input = document.getElementById('name-input');
+                const btn = document.getElementById('save-score-btn');
+                setTimeout(() => input && input.focus(), 60);
+                const submit = () => {
+                    const name = (input.value || '').trim() || 'Anónimx';
+                    saveToRanking(name, totalTime, score);
+                    showRankingModal();
+                };
+                btn.onclick = submit;
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); submit(); }
+                });
+            }
+
+            function showRankingModal() {
+                const ranking = getRanking();
+                const rows = ranking.slice(0, 10).map((r, i) => `
+                    <div class="rank-row">
+                        <span class="rank-pos">${i+1}.</span>
+                        <span class="rank-name">${escapeHtml(r.name)}</span>
+                        <span class="rank-time">${formatTime(r.time)}</span>
+                        <span class="rank-score">${r.score}pts</span>
+                    </div>
+                `).join('');
+                modal.classList.add('active');
+                modal.innerHTML = `
+                    <h2>RANKING DE UNIDAD POPULAR</h2>
+                    <div class="ranking-list">${rows || '<p>Sin registros aún</p>'}</div>
+                    <button id="close-rank-btn">VOLVER AL MENÚ</button>
+                `;
+                document.getElementById('close-rank-btn').onclick = () => {
+                    modal.classList.remove('active');
+                    resetFullGame();
+                };
+            }
+
+            function resetFullGame() {
+                gameState = STATE.MENU;
+                score = 0; lives = 3; currentLevel = 1; totalTime = 0; maxComboReached = 1;
+                paceUnlocked = false; healthUnlocked = false; maskUnlocked = false; inclusiveUnlocked = false;
+                brigadista = null;
+            }
+
+            function drawShareHint() {
+                ctx.fillStyle = 'rgba(224,224,224,0.75)';
+                ctx.font = `${Math.min(12, Math.max(9, W/60))}px "Inter", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText("Presioná 'C' para copiar tu puntaje y desafiar a otrx", W/2, H*0.91);
+            }
+            function shareScore() {
+                const text = `Hice ${formatTime(totalTime)} (${score} pts) en "Unidad contra el Presidente Anarcocapitalista" 🚩 ¿Me superás? https://piquelin.github.io/inti-utiles/`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(()=>{
+                        floatingMessages.push({ text:'¡Puntaje copiado al portapapeles!', life:1.6, color:'#ff3838', x:W/2, y:H*0.76, small:true });
+                    }).catch(()=>{});
+                }
+            }
+
+            function proceedAfterLevelComplete() {
+                const proceedToUnlockOrNext = () => {
+                    if (UNLOCK_INFO[currentLevel]) {
+                        pendingUnlockLevel = currentLevel;
+                        if (currentLevel === 1) paceUnlocked = true;
+                        if (currentLevel === 2) healthUnlocked = true;
+                        if (currentLevel === 3) maskUnlocked = true;
+                        if (currentLevel === 4) inclusiveUnlocked = true;
+                        gameState = STATE.ABILITY_UNLOCK;
+                    } else if (currentLevel < MAX_REGULAR_LEVELS) {
+                        initLevel(currentLevel + 1);
+                    } else {
+                        initBossLevel();
+                    }
+                };
+                showLevelVideoModal(currentLevel, proceedToUnlockOrNext);
+            }
+
+            function handleClick() {
+                if (modal.classList.contains('active')) return;
+                if (devPanel.classList.contains('open')) {
+                    devPanel.classList.remove('open');
+                    return;
+                }
+                initAudio();
+                const bgm = document.getElementById('bgm');
+                if (bgm && bgm.paused) {
+                    bgm.volume = 0.25;
+                    bgm.play().catch(() => {});
+                }
+
+                if (gameState === STATE.MENU) gameState = STATE.TUTORIAL;
+                else if (gameState === STATE.TUTORIAL) {
+                    resetFullGame();
+                    initLevel(1);
+                }
+                else if (gameState === STATE.LEVEL_COMPLETE) {
+                    proceedAfterLevelComplete();
+                }
+                else if (gameState === STATE.ABILITY_UNLOCK) {
+                    if (pendingUnlockLevel < MAX_REGULAR_LEVELS) initLevel(pendingUnlockLevel + 1);
+                    else initBossLevel();
+                }
+                else if (gameState === STATE.BOSS_INTRO) { gameState = STATE.BOSS_BATTLE; bossIntroTimer = 0; }
+                else if (gameState === STATE.GAME_OVER) { resetFullGame(); }
+            }
+
+            canvas.addEventListener('click', handleClick);
+            window.addEventListener('keydown', e => {
+                if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT')) return;
+                initAudio();
+                const k = e.key.toLowerCase();
+                keys[k] = true;
+                if (k==='c' && (gameState===STATE.GAME_OVER||gameState===STATE.VICTORY)) shareScore();
+                if (k==='e') useInclusiveAbility();
+                if (e.key===' '||e.key==='Enter') handleClick();
+            });
+            window.addEventListener('keyup', e => { keys[e.key.toLowerCase()]=false; });
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            gameState = STATE.MENU;
+            requestAnimationFrame(loop);
+
+            // ==================== BUCLE PRINCIPAL ====================
+            let lastTime = performance.now();
+            function loop(now) {
+                resizeCanvas();
+                let dt = Math.min(0.1, (now-lastTime)/1000);
+                lastTime = now;
+                const cfg = currentLevel <= MAX_REGULAR_LEVELS ? getLevelConfig(currentLevel) : null;
+                
+                if (cameraShake > 0) cameraShake = Math.max(0, cameraShake - dt*30);
+                if (inclusiveFlash > 0) inclusiveFlash = Math.max(0, inclusiveFlash - dt*1.6);
+
+                if (gameState === STATE.MENU) {
+                    drawWorld();
+                    drawOverlay('UNIDAD CONTRA EL PRESIDENTE', `Organizá a cada sector, sumá sus conquistas y resistí.\nRécord: ${highScore} pts`, 'HAZ CLIC PARA EMPEZAR');
+                }
+                else if (gameState === STATE.TUTORIAL) {
+                    drawWorld();
+                    ctx.fillStyle = `rgba(20, 20, 36, 0.92)`; ctx.fillRect(0,0,W,H);
+                    let titleSize = Math.min(24, W / 28);
+                    ctx.fillStyle='#ff3838'; ctx.font=`bold ${titleSize}px "Press Start 2P", cursive`; ctx.textAlign='center';
+                    ctx.fillText('CÓMO ORGANIZARSE', W/2, H*0.11);
+                    
+                    ctx.fillStyle='#e0e0e0'; ctx.font=`${Math.min(15, Math.max(11, W/52))}px "Inter", sans-serif`;
+                    const lines = [
+                        '👥 CIUDADANOS: Tocalos para sumarlos a tu columna organizada.',
+                        '⚠️ NIVEL 1 (DISCAPACIDAD): No corras sin esperar al grupo o se soltarán.',
+                        '💨 GASES LACRIMÓGENOS: La policía tira gases que hacen llorar (😢) y enlentecen.',
+                        '🚩 BANDERA ROJA: Aparece al juntar los necesarios y desata la marea popular.',
+                        '',
+                        '✨ CONQUISTAS QUE DESBLOQUEA CADA SECTOR:',
+                        '🤝 Nv.1 Discapacidad: Paso Colectivo  ·  🏥 Nv.2 Jubilados: Posta de Salud (Brigadista)',
+                        '🥽 Nv.3 Ciencia: Máscaras Antigás  ·  🗣️ Nv.4 Feminismos (E): Aturdir policías',
+                        '',
+                        'Controles: W A S D / Flechas  ·  Tecla E (Lenguaje Inclusivo)'
+                    ];
+                    lines.forEach((line,i)=> ctx.fillText(line, W/2, H*0.22 + i*Math.min(28, W/36)));
+                    
+                    ctx.fillStyle = '#ff3838'; 
+                    ctx.font = `bold ${Math.min(15, Math.max(10, W/45))}px "Press Start 2P", cursive`;
+                    ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
+                    ctx.fillText('HAZ CLIC PARA JUGAR', W/2, H*0.91);
+                    ctx.globalAlpha = 1;
+                }
+                else if (gameState === STATE.PLAYING || gameState === STATE.BOSS_BATTLE) {
+                    player.update(dt);
+                    if (brigadista && healthUnlocked) brigadista.update(dt);
+                    citizens.forEach(c=>c.update(dt, cfg||getLevelConfig(5)));
+                    policeUnits.forEach(p=>p.update(dt, player, cfg||getLevelConfig(5)));
+                    if (resistanceFocus) resistanceFocus.update(dt);
+                    safeZones.forEach(s=>s.update(dt));
+                    gasClouds.forEach(g=>g.update(dt));
+                    gasClouds = gasClouds.filter(g=>g.life > 0);
+                    if (flag) flag.update(dt);
+
+                    totalTime += dt;
+                    if (inclusiveCooldown > 0) inclusiveCooldown = Math.max(0, inclusiveCooldown - dt);
+
+                    if (bossWave.active && gameState === STATE.BOSS_BATTLE && boss) {
+                        bossWave.timer -= dt;
+                        for (let i=0;i<10;i++) spawnTideParticle();
+                        for (let p of policeUnits) if (p.stunTimer < 1.2) p.stun(2.0);
+                        if (bossWave.timer <= 0) {
+                            boss.hit(25);
+                            if (boss.hp <= 0) {
+                                sfxVictory();
+                                setVictory();
+                            }
+                            if (bossWave.pending > 0) {
+                                bossWave.pending--;
+                                bossWave.timer = 2.4;
+                            } else {
+                                bossWave.active = false;
+                            }
+                        }
+                    }
+
+                    if (gameState === STATE.BOSS_BATTLE) {
+                        bossSpawnTimer -= dt;
+                        const freeCount = citizens.filter(c => !c.collected).length;
+                        if (bossSpawnTimer <= 0 && freeCount < 14) {
+                            const allTypes = ['jubilado','discapacitado','cientifico','feminista','universitario'];
+                            citizens.push(new Citizen(
+                                45 + Math.random()*(W-90),
+                                45 + Math.random()*(H-90),
+                                allTypes[Math.floor(Math.random()*allTypes.length)]
+                            ));
+                            bossSpawnTimer = 1.8 + Math.random()*1.4;
+                        }
+                    }
+
+                    if (mobilization.active) {
+                        mobilization.timer -= dt;
+                        for (let i=0;i<12;i++) spawnTideParticle();
+                        for (let p of policeUnits) {
+                            if (p.stunTimer>0) continue;
+                            for (let pt of particles) {
+                                if (pt.isTide && Math.hypot(pt.x-p.x, pt.y-p.y) < pt.radius+p.radius) {
+                                    p.stun(10); pt.life = 0; break;
+                                }
+                            }
+                        }
+
+                        if (mobilization.timer <= 0) {
+                            policeUnits.forEach(p=>p.stun(999));
+                            mobilization.active = false;
+                            if (mobilization.isFinal) {
+                                gameState = mobilization.outcomeState;
+                                if (gameState === STATE.LEVEL_COMPLETE) sfxVictory();
+                            }
+                        }
+                    }
+
+                    if (!mobilization.active && gameState !== STATE.GAME_OVER && gameState !== STATE.VICTORY) {
+                        playerCollect();
+                        policeCapture();
+                        bossCapture();
+                        safeZoneProtect();
+                        checkNearMiss();
+                        if (gameState === STATE.PLAYING && cfg) {
+                            checkFlagSpawn(cfg.required);
+                        } else if (gameState === STATE.BOSS_BATTLE) {
+                            boss.update(dt, player);
+                            bossTauntTimer -= dt;
+                            if (bossTauntTimer <= 0) {
+                                let next = bossTauntText;
+                                while (next === bossTauntText) next = BOSS_TAUNTS[Math.floor(Math.random()*BOSS_TAUNTS.length)];
+                                bossTauntText = next; bossTauntTimer = 7;
+                            }
+                        }
+                        checkFlagCollection();
+                    }
+
+                    particles = particles.filter(p=>p.alive ? (p.update(dt), true) : false);
+                    floatingMessages.forEach(m=>{ if (m.life < 1000) m.life -= dt; if (m.small) m.y -= 24*dt; });
+                    floatingMessages = floatingMessages.filter(m=>m.life>0);
+
+                    updateHUD(cfg);
+                    drawWorld();
+                }
+                else if (gameState === STATE.BOSS_INTRO) {
+                    drawWorld();
+
+                    ctx.fillStyle = 'rgba(20, 20, 36, 0.92)';
+                    ctx.fillRect(0, 0, W, H);
+
+                    let titleSize = Math.min(22, W / 30);
+                    ctx.fillStyle = '#ff3838';
+                    ctx.font = `bold ${titleSize}px "Press Start 2P", cursive`;
+                    ctx.textAlign = 'center';
+                    ctx.shadowColor = '#000'; ctx.shadowBlur = 8;
+                    ctx.fillText('¡EL PRESIDENTE APARECE!', W/2, H*0.13);
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = '#e0e0e0';
+                    ctx.font = `${Math.min(15, Math.max(11, W/48))}px "Inter", sans-serif`;
+                    const introLines = [
+                        'Con la plata que le prestó el FMI y Trump,',
+                        'el presidente intenta pasar por encima del Congreso.',
+                        '',
+                        '¡Tenés todas las conquistas del pueblo activas:',
+                        '🤝 Unidad · 🏥 Posta Salud · 🥽 Antigás · 🗣️ Inclusivo (E)!',
+                        '',
+                        'Organizá 4 olas populares (10, 20, 30 y 40 ciudadanos)',
+                        'para derrotarlo definitivamente.'
+                    ];
+                    introLines.forEach((line, i) => {
+                        ctx.fillText(line, W/2, H*0.26 + i*Math.min(26, W/32));
+                    });
+
+                    ctx.fillStyle = '#ff3838';
+                    ctx.font = `bold ${Math.min(15, Math.max(10, W/45))}px "Press Start 2P", cursive`;
+                    ctx.globalAlpha = 0.5 + Math.abs(Math.sin(Date.now()*0.003))*0.5;
+                    ctx.fillText('CLIC O ENTER PARA LUCHAR', W/2, H*0.9);
+                    ctx.globalAlpha = 1;
+
+                    bossIntroTimer += dt;
+                    if (bossIntroTimer > 6 || keys[' '] || keys['enter']) {
+                        gameState = STATE.BOSS_BATTLE;
+                        bossIntroTimer = 0;
+                    }
+                }
+                else if (gameState === STATE.ABILITY_UNLOCK) {
+                    drawWorld();
+                    drawAbilityUnlockOverlay(pendingUnlockLevel);
+                }
+                else if (gameState === STATE.LEVEL_COMPLETE) {
+                    drawWorld();
+                    drawOverlay(`¡SECTOR ORGANIZADO!`, `Completaste: ${LEVEL_TITLES[currentLevel]}\nTiempo acumulado: ${formatTime(totalTime)}`, 'CONTINUAR');
+                }
+                else if (gameState === STATE.GAME_OVER) {
+                    drawWorld();
+                    const rec = score >= highScore && score > 0;
+                    drawOverlay('LA ORGANIZACIÓN FRACASÓ', `La represión logró dispersar la columna.\nTiempo: ${formatTime(totalTime)} · Puntaje: ${score}` + (rec ? '\n¡Nuevo récord!' : `\nRécord: ${highScore}`), 'VOLVER A INTENTAR');
+                    drawShareHint();
+                }
+                else if (gameState === STATE.VICTORY) {
+                    drawWorld();
+                }
+
+                requestAnimationFrame(loop);
+            }
+        })();
+    </script>
+</body>
+</html>
