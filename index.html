@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unidad Contra el Presidente Anarco Capitalista</title>
+    <!-- ============================================================
+         CONFIGURACIÓN: Cambia aquí el nombre de la versión activa
+         ============================================================ -->
+    <script>
+        // 👉 Cambia esta variable cuando subas una nueva versión del juego:
+        const LATEST_GAME_FILE = 'Agrupemonos_vivecode_v0.9.html';
+
+        // Redirección inmediata
+        window.location.replace(LATEST_GAME_FILE);
+    </script>
+    <meta http-equiv="refresh" content="0; url=Agrupemonos_vivecode_v0.9.html">
+    <style>
+        body {
+            background: #1a1a24;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            padding: 30px;
+            background: rgba(20, 20, 30, 0.9);
+            border: 2px solid #474759;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #ff4757;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        p {
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        a {
+            display: inline-block;
+            background: #2ed573;
+            color: #111;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        a:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Unidad Contra el Presidente</h1>
+        <p>Iniciando el juego...</p>
+        <p>Si la pantalla no carga automáticamente:</p>
+        <a id="game-link" href="Agrupemonos_vivecode_v0.9.html">Entrar al juego</a>
+    </div>
+    <script>
+        document.getElementById('game-link').href = LATEST_GAME_FILE;
+    </script>
+</body>
+</html>
